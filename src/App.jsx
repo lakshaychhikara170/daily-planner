@@ -54,7 +54,7 @@ function App() {
           <header className="border-b px-content" style={{ padding: '1.5rem 4vw', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <div style={{ width: '20px', height: '20px', backgroundColor: 'var(--text-color)', clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}></div>
-              <h2 style={{ fontSize: '1rem', fontWeight: 600, letterSpacing: '0.05em' }}>DAILY PLANNER<sup style={{ fontSize: '0.6em', verticalAlign: 'super' }}>©</sup></h2>
+              <h2 style={{ fontSize: '1rem', fontWeight: 600, letterSpacing: '0.05em' }}>EXECUTE PRO<sup style={{ fontSize: '0.6em', verticalAlign: 'super' }}>©</sup></h2>
             </div>
             
             <div style={{ display: 'flex', gap: '2rem', fontSize: '0.85rem', fontWeight: 500 }}>
