@@ -9,7 +9,7 @@ function FullscreenTimer() {
     isFocusTimerActive, setIsFocusTimerActive,
     countdown, setCountdown,
     isFocusMode, setIsFocusMode,
-    isEditingTimer, setIsEditingTimer
+    setShowCompletionPrompt, updateQuest
   } = useContext(AppContext);
 
   // We need local state for isEditingTimer since it's only UI related
