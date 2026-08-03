@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
-import { saveMediaBlob, deleteMediaBlob } from '../utils/storage';
+import { saveMediaBlob, deleteMediaBlob, getMediaBlob } from '../utils/storage';
 import { AppContext } from '../context/AppContext';
 
 function Tasks() {
   const { 
     tasks, setTasks,
     activeTask, setActiveTask,
-    addPoints, updateQuest
+    addPoints, updateQuest,
+    setTrackedTask, setIsFocusMode, setFocusTimeLeft, setIsFocusTimerActive, setCountdown
   } = useContext(AppContext);
   
   const [isAddingTask, setIsAddingTask] = useState(true); 
