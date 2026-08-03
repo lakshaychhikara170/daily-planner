@@ -407,6 +407,7 @@ function MediaElement({ media, onUpdate, onDelete }) {
   if (!blobUrl) return null;
 
   const renderContent = () => {
+    if (!media || !media.type) return <div style={{ color: '#fff', padding: '1rem' }}>Unsupported Media</div>;
     if (media.type.startsWith('image/')) return <img src={blobUrl} style={{ width: '100%', height: '100%', objectFit: 'cover', pointerEvents: 'none' }} draggable={false} />;
     if (media.type.startsWith('video/')) return <video src={blobUrl} controls style={{ width: '100%', height: '100%', objectFit: 'cover' }} />;
     if (media.type === 'application/pdf') return <iframe src={blobUrl} style={{ width: '100%', height: '100%', border: 'none' }} />;
