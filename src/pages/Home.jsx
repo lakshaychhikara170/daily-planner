@@ -60,7 +60,7 @@ function Home() {
             backgroundColor: 'var(--bg-color)',
             padding: '4vw',
             borderRight: '1px solid var(--border-color)',
-            cursor: 'none',
+            
             transition: 'background-color 0.3s ease',
             position: 'relative'
           }}
@@ -141,7 +141,7 @@ function Home() {
             backgroundColor: 'var(--text-color)', 
             color: 'var(--bg-color)',
             padding: '4vw',
-            cursor: 'none',
+            
             transition: 'background-color 0.3s ease',
             position: 'relative',
             overflow: 'hidden'
@@ -237,7 +237,7 @@ function Home() {
             <div 
               className="interactive"
               onClick={() => window.location.hash = '#/review'}
-              style={{ padding: '3rem', border: '1px solid var(--border-color)', backgroundColor: 'var(--text-color)', color: 'var(--bg-color)', cursor: 'none' }}
+              style={{ padding: '3rem', border: '1px solid var(--border-color)', backgroundColor: 'var(--text-color)', color: 'var(--bg-color)', }}
             >
               <h3 style={{ fontSize: '1.5rem', fontFamily: 'var(--font-serif)', marginBottom: '1rem' }}>Review Dashboard &rarr;</h3>
               <p style={{ opacity: 0.8, fontSize: '1rem', lineHeight: 1.6 }}>Track your task velocity, habit consistency, and log your weekly reflections.</p>
@@ -246,7 +246,7 @@ function Home() {
             <div 
               className="interactive"
               onClick={() => window.location.hash = '#/routines'}
-              style={{ padding: '3rem', border: '1px solid var(--border-color)', backgroundColor: 'transparent', cursor: 'none' }}
+              style={{ padding: '3rem', border: '1px solid var(--border-color)', backgroundColor: 'transparent', }}
             >
               <h3 style={{ fontSize: '1.5rem', fontFamily: 'var(--font-serif)', marginBottom: '1rem' }}>Dynamic Reordering &rarr;</h3>
               <p style={{ opacity: 0.7, fontSize: '1rem', lineHeight: 1.6 }}>Drag and drop your tasks and routines to visually prioritize your high-leverage activities.</p>

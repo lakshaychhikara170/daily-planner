@@ -6,7 +6,7 @@ import { AppContext } from '../context/AppContext';
 
 export default function ThemeEditor() {
   const [isOpen, setIsOpen] = useState(false);
-  const { currentTheme, presets, updateVariable, resetTheme, savePreset, loadPreset } = useThemeEditor();
+  const { currentTheme, presets, cursorStyle, setCursorStyle, updateVariable, resetTheme, savePreset, loadPreset } = useThemeEditor();
   const { isEditMode, setIsEditMode } = useEditMode();
   const { isGamified, setIsGamified, soundEnabled, setSoundEnabled, levelInfo } = useContext(AppContext);
   const [presetName, setPresetName] = useState('');
@@ -60,8 +60,7 @@ export default function ThemeEditor() {
           borderRadius: '999px',
           fontFamily: 'var(--font-sans)',
           fontWeight: 600,
-          cursor: 'none'
-        }}
+          }}
       >
         {isOpen ? 'Close Editor' : 'Edit UI'}
       </button>
@@ -96,7 +95,7 @@ export default function ThemeEditor() {
               <button 
                 onClick={() => setIsGamified(!isGamified)}
                 className="interactive"
-                style={{ padding: '0.25rem 0.75rem', background: isGamified ? '#000' : 'var(--text-color)', color: isGamified ? 'var(--accent-green)' : 'var(--bg-color)', border: 'none', borderRadius: '4px', cursor: 'none', fontFamily: 'var(--font-sans)', fontSize: '0.75rem', fontWeight: 600 }}
+                style={{ padding: '0.25rem 0.75rem', background: isGamified ? '#000' : 'var(--text-color)', color: isGamified ? 'var(--accent-green)' : 'var(--bg-color)', border: 'none', borderRadius: '4px',  fontFamily: 'var(--font-sans)', fontSize: '0.75rem', fontWeight: 600 }}
               >
                 {isGamified ? 'ON' : 'OFF'}
               </button>
@@ -107,7 +106,7 @@ export default function ThemeEditor() {
               <button 
                 onClick={() => setSoundEnabled(!soundEnabled)}
                 className="interactive"
-                style={{ padding: '0.25rem 0.75rem', background: soundEnabled ? '#000' : 'var(--text-color)', color: soundEnabled ? 'var(--accent-green)' : 'var(--bg-color)', border: 'none', borderRadius: '4px', cursor: 'none', fontFamily: 'var(--font-sans)', fontSize: '0.75rem', fontWeight: 600 }}
+                style={{ padding: '0.25rem 0.75rem', background: soundEnabled ? '#000' : 'var(--text-color)', color: soundEnabled ? 'var(--accent-green)' : 'var(--bg-color)', border: 'none', borderRadius: '4px',  fontFamily: 'var(--font-sans)', fontSize: '0.75rem', fontWeight: 600 }}
               >
                 {soundEnabled ? 'ON' : 'OFF'}
               </button>
@@ -118,10 +117,30 @@ export default function ThemeEditor() {
               <button 
                 onClick={() => setIsEditMode(!isEditMode)}
                 className="interactive"
-                style={{ padding: '0.25rem 0.75rem', background: isEditMode ? '#000' : 'var(--text-color)', color: isEditMode ? 'var(--accent-green)' : 'var(--bg-color)', border: 'none', borderRadius: '4px', cursor: 'none' }}
+                style={{ padding: '0.25rem 0.75rem', background: isEditMode ? '#000' : 'var(--text-color)', color: isEditMode ? 'var(--accent-green)' : 'var(--bg-color)', border: 'none', borderRadius: '4px', }}
               >
                 {isEditMode ? 'ON' : 'OFF'}
               </button>
+            </div>
+
+            <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.85rem', fontFamily: 'var(--font-sans)' }}>Cursor Style</h4>
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
+              {['default', 'dot', 'ring'].map(style => (
+                <button
+                  key={style}
+                  onClick={() => setCursorStyle(style)}
+                  className="interactive"
+                  style={{
+                    flex: 1, padding: '0.5rem', background: cursorStyle === style ? 'var(--text-color)' : 'transparent',
+                    color: cursorStyle === style ? 'var(--bg-color)' : 'var(--text-color)',
+                    border: '1px solid var(--border-color)', borderRadius: '4px',
+                    fontFamily: 'var(--font-sans)', fontSize: '0.75rem', fontWeight: 600,
+                    textTransform: 'capitalize'
+                  }}
+                >
+                  {style === 'default' ? 'OS' : style}
+                </button>
+              ))}
             </div>
 
             <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.85rem', fontFamily: 'var(--font-sans)' }}>Unlockable Cosmetics</h4>
@@ -175,7 +194,7 @@ export default function ThemeEditor() {
                           padding: control.type === 'color' ? '0' : '0.25rem 0.5rem',
                           width: control.type === 'color' ? '30px' : '100px',
                           height: control.type === 'color' ? '30px' : 'auto',
-                          cursor: 'none',
+                          
                           fontFamily: 'var(--font-sans)',
                           fontSize: '0.75rem'
                         }}
@@ -189,7 +208,7 @@ export default function ThemeEditor() {
                   <button 
                     onClick={resetTheme}
                     className="interactive"
-                    style={{ flex: 1, padding: '0.5rem', background: 'transparent', border: '1px solid var(--text-color)', color: 'var(--text-color)', cursor: 'none', fontFamily: 'var(--font-sans)', fontSize: '0.8rem', fontWeight: 600 }}
+                    style={{ flex: 1, padding: '0.5rem', background: 'transparent', border: '1px solid var(--text-color)', color: 'var(--text-color)',  fontFamily: 'var(--font-sans)', fontSize: '0.8rem', fontWeight: 600 }}
                   >
                     Reset Default
                   </button>
@@ -205,12 +224,12 @@ export default function ThemeEditor() {
                 onChange={e => setPresetName(e.target.value)}
                 placeholder="Preset Name..."
                 className="interactive"
-                style={{ flex: 1, padding: '0.5rem', background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-color)', cursor: 'none', fontFamily: 'var(--font-sans)', fontSize: '0.8rem' }}
+                style={{ flex: 1, padding: '0.5rem', background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-color)',  fontFamily: 'var(--font-sans)', fontSize: '0.8rem' }}
               />
               <button 
                 onClick={handleSave}
                 className="interactive"
-                style={{ padding: '0.5rem 1rem', background: 'var(--text-color)', color: 'var(--bg-color)', border: 'none', cursor: 'none', fontFamily: 'var(--font-sans)', fontSize: '0.8rem', fontWeight: 600 }}
+                style={{ padding: '0.5rem 1rem', background: 'var(--text-color)', color: 'var(--bg-color)', border: 'none',  fontFamily: 'var(--font-sans)', fontSize: '0.8rem', fontWeight: 600 }}
               >
                 Save
               </button>
@@ -228,7 +247,7 @@ export default function ThemeEditor() {
                     border: '1px solid var(--border-color)',
                     textAlign: 'left',
                     color: 'var(--text-color)',
-                    cursor: 'none',
+                    
                     fontFamily: 'var(--font-sans)',
                     fontSize: '0.8rem'
                   }}

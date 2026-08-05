@@ -36,10 +36,13 @@ let checkInterval = null;
 
 export function startUnifiedNotificationScheduler() {
   if (checkInterval) clearInterval(checkInterval);
-  if (typeof Notification === 'undefined' || Notification.permission !== "granted") return;
+  if (typeof Notification === 'undefined') return;
   
   // We run checking once every minute
   checkInterval = setInterval(() => {
+    // Check permission inside the interval, so if the user enables it later, it instantly starts working
+    if (Notification.permission !== "granted") return;
+
     const now = new Date();
     const nowMs = now.getTime();
     

@@ -460,7 +460,7 @@ function Routines() {
             <span 
               className="interactive"
               onClick={() => setCheatMode(!cheatMode)}
-              style={{ color: 'var(--accent-green)', cursor: 'none', padding: '0.5rem', margin: '-0.5rem' }}
+              style={{ color: 'var(--accent-green)',  padding: '0.5rem', margin: '-0.5rem' }}
               title="Hidden Unlock"
             >
               ●
@@ -480,7 +480,7 @@ function Routines() {
                 width: '40px',
                 height: '40px',
                 color: 'var(--text-color)',
-                cursor: 'none',
+                
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -513,7 +513,7 @@ function Routines() {
                 background: 'transparent', border: '1px solid var(--border-color)', borderRadius: '50%',
                 width: '40px', height: '40px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'var(--text-color)', cursor: 'none', opacity: 0.6, transition: 'all 0.2s ease'
+                color: 'var(--text-color)',  opacity: 0.6, transition: 'all 0.2s ease'
               }}
               onMouseEnter={(e) => { e.currentTarget.style.opacity = 1; e.currentTarget.style.borderColor = 'var(--text-color)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.opacity = 0.6; e.currentTarget.style.borderColor = 'var(--border-color)'; }}
@@ -658,7 +658,7 @@ function Routines() {
                           borderRadius: '16px',
                           fontSize: '0.75rem',
                           fontFamily: 'var(--font-sans)',
-                          cursor: 'none',
+                          
                           transition: 'all 0.2s ease'
                         }}
                       >
@@ -749,7 +749,7 @@ function Routines() {
                     background: 'transparent', border: '1px solid var(--border-color)', borderRadius: '50%',
                     width: '40px', height: '40px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: 'var(--text-color)', cursor: 'none', opacity: 0.6, transition: 'all 0.2s ease',
+                    color: 'var(--text-color)',  opacity: 0.6, transition: 'all 0.2s ease',
                     outline: 'none'
                   }}
                   onMouseEnter={(e) => { e.currentTarget.style.opacity = 1; e.currentTarget.style.borderColor = 'var(--text-color)'; }}
@@ -878,7 +878,7 @@ function Routines() {
                         border: 'none', 
                         color: 'var(--accent-green)', 
                         opacity: routine.isLocked ? 1 : 0.4,
-                        cursor: 'none',
+                        
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -1024,7 +1024,7 @@ function Routines() {
                 borderRight: '1px solid var(--border-color)'
               }}>
                 <span>{metric.label} {metric.unit && <span style={{ fontSize: '0.75rem', opacity: 0.5, fontFamily: 'var(--font-sans)', textTransform: 'uppercase', letterSpacing: '0.1em', fontStyle: 'normal' }}>({metric.unit})</span>}</span>
-                <button className="delete-btn interactive" onClick={() => setMetrics(metrics.filter(m => m.id !== metric.id))} style={{ color: 'var(--accent-orange)', opacity: 0.4, border: 'none', background: 'transparent', cursor: 'none' }} title="Delete Metric">×</button>
+                <button className="delete-btn interactive" onClick={() => setMetrics(metrics.filter(m => m.id !== metric.id))} style={{ color: 'var(--accent-orange)', opacity: 0.4, border: 'none', background: 'transparent', }} title="Delete Metric">×</button>
               </div>
               
               {monthDays.map((dateObj, i) => {
@@ -1144,7 +1144,7 @@ function Routines() {
                     padding: '0.25rem 0.75rem',
                     fontFamily: 'var(--font-sans)',
                     fontSize: '0.8rem',
-                    cursor: 'none',
+                    
                     fontWeight: 'bold'
                   }}>Add</button>
                 </div>

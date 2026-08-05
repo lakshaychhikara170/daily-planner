@@ -121,7 +121,7 @@ function FullscreenTimer() {
             style={{ 
               background: '#000000', border: 'none', borderRadius: '0',
               height: '80px', padding: '0 3rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem',
-              color: '#D4F536', cursor: 'none', transition: 'all 0.2s ease', outline: 'none',
+              color: '#D4F536',  transition: 'all 0.2s ease', outline: 'none',
               fontFamily: 'var(--font-sans)', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '0.1em'
             }}
           >
@@ -155,7 +155,7 @@ function FullscreenTimer() {
             style={{ 
               background: '#000000', border: 'none', borderRadius: '0',
               height: '80px', padding: '0 3rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem',
-              color: '#FF3B30', cursor: 'none', transition: 'all 0.2s ease', outline: 'none',
+              color: '#FF3B30',  transition: 'all 0.2s ease', outline: 'none',
               fontFamily: 'var(--font-sans)', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '0.1em'
             }}
           >
@@ -175,7 +175,7 @@ function FullscreenTimer() {
             style={{ 
               background: '#000000', border: 'none', borderRadius: '0',
               height: '80px', padding: '0 3rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem',
-              color: '#F0EEE9', cursor: 'none', transition: 'all 0.2s ease', opacity: 0.8, outline: 'none',
+              color: '#F0EEE9',  transition: 'all 0.2s ease', opacity: 0.8, outline: 'none',
               fontFamily: 'var(--font-sans)', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '0.1em'
             }}
             onMouseEnter={(e) => { e.currentTarget.style.opacity = 1; }}
@@ -203,7 +203,7 @@ function FullscreenTimer() {
               style={{
                 background: 'transparent', border: '1px solid #333', color: '#8A8A85',
                 padding: '0.5rem 1rem', fontSize: '0.75rem', fontFamily: 'var(--font-sans)',
-                cursor: 'none', transition: 'all 0.2s ease', borderRadius: '4px'
+                 transition: 'all 0.2s ease', borderRadius: '4px'
               }}
               onMouseEnter={(e) => { e.currentTarget.style.color = '#F0EEE9'; e.currentTarget.style.borderColor = '#F0EEE9'; }}
               onMouseLeave={(e) => { e.currentTarget.style.color = '#8A8A85'; e.currentTarget.style.borderColor = '#333'; }}

@@ -293,7 +293,7 @@ function Routines() {
             <span 
               className="interactive"
               onClick={() => setCheatMode(!cheatMode)}
-              style={{ color: 'transparent', cursor: 'none', padding: '0.5rem', margin: '-0.5rem', userSelect: 'none' }}
+              style={{ color: 'transparent',  padding: '0.5rem', margin: '-0.5rem', userSelect: 'none' }}
               title="Hidden Unlock"
             >
               ●
@@ -312,7 +312,7 @@ function Routines() {
                 background: 'transparent',
                 border: 'none',
                 color: '#1A1A1A',
-                cursor: 'none',
+                
                 fontSize: '0.75rem',
                 fontWeight: 'bold',
                 textTransform: 'uppercase',
@@ -338,7 +338,7 @@ function Routines() {
               style={{
                 background: 'transparent', border: 'none', color: '#1A1A1A',
                 fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 'bold',
-                cursor: 'none', transition: 'opacity 0.2s ease'
+                 transition: 'opacity 0.2s ease'
               }}
               onMouseEnter={(e) => { e.currentTarget.style.opacity = 0.6; }}
               onMouseLeave={(e) => { e.currentTarget.style.opacity = 1; }}
@@ -481,7 +481,7 @@ function Routines() {
                     background: 'transparent', border: '1px solid var(--border-color)', borderRadius: '50%',
                     width: '40px', height: '40px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: 'var(--text-color)', cursor: 'none', opacity: 0.6, transition: 'all 0.2s ease',
+                    color: 'var(--text-color)',  opacity: 0.6, transition: 'all 0.2s ease',
                     outline: 'none'
                   }}
                   onMouseEnter={(e) => { e.currentTarget.style.opacity = 1; e.currentTarget.style.borderColor = 'var(--text-color)'; }}
@@ -605,20 +605,20 @@ function Routines() {
                     <button 
                       className="interactive" 
                       onClick={() => toggleLock(routine.id)}
-                      style={{ background: 'transparent', border: 'none', color: routine.isLocked ? '#D4F536' : '#8A8A85', cursor: 'none', padding: 0 }}
+                      style={{ background: 'transparent', border: 'none', color: routine.isLocked ? '#D4F536' : '#8A8A85',  padding: 0 }}
                     >
                       {routine.isLocked ? 'UNLOCK' : 'LOCK'}
                     </button>
                     
                     {!routine.isLocked && (
                       <>
-                        <button className="interactive" onClick={() => toggleArchive(routine.id)} style={{ background: 'transparent', border: 'none', color: '#8A8A85', cursor: 'none', padding: 0 }}>
+                        <button className="interactive" onClick={() => toggleArchive(routine.id)} style={{ background: 'transparent', border: 'none', color: '#8A8A85',  padding: 0 }}>
                           {routine.isArchived ? 'UNARCHIVE' : 'ARCHIVE'}
                         </button>
                         <button 
                           className="interactive" 
                           onClick={() => removeRoutine(routine.id)} 
-                          style={{ background: 'transparent', border: 'none', color: '#8A8A85', cursor: 'none', padding: 0, transition: 'color 0.2s ease' }} 
+                          style={{ background: 'transparent', border: 'none', color: '#8A8A85',  padding: 0, transition: 'color 0.2s ease' }} 
                           onMouseEnter={(e) => e.target.style.color = '#1A1A1A'} 
                           onMouseLeave={(e) => e.target.style.color = '#8A8A85'}
                         >

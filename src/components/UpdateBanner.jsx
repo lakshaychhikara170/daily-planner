@@ -43,8 +43,7 @@ export default function UpdateBanner({ updateInfo, onClose }) {
             textDecoration: 'none',
             fontSize: '0.8rem',
             marginLeft: 'auto',
-            cursor: 'none'
-          }}
+            }}
           className="interactive"
         >
           Download Update
@@ -56,7 +55,7 @@ export default function UpdateBanner({ updateInfo, onClose }) {
             background: 'transparent',
             border: 'none',
             color: '#000',
-            cursor: 'none',
+            
             fontSize: '1.2rem',
             lineHeight: 1,
             marginLeft: '8px',

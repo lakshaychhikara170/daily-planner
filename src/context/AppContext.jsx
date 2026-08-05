@@ -1,8 +1,14 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import { AuthContext } from './AuthContext';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { db } from '../utils/firebase';
 
 export const AppContext = createContext();
 
 export function AppProvider({ children }) {
+  const { user, isPro } = useContext(AuthContext);
+  const [cloudSyncLoaded, setCloudSyncLoaded] = useState(false);
+
   const [tasks, setTasks] = useState(() => {
     const savedTasks = localStorage.getItem('dailyPlannerTasks');
     if (savedTasks) return JSON.parse(savedTasks);
@@ -185,6 +191,47 @@ export function AppProvider({ children }) {
   useEffect(() => { localStorage.setItem('dailyPlannerSound', JSON.stringify(soundEnabled)); }, [soundEnabled]);
   useEffect(() => { localStorage.setItem('dailyPlannerStreak', JSON.stringify(streak)); }, [streak]);
   useEffect(() => { localStorage.setItem('dailyPlannerQuests', JSON.stringify(dailyQuests)); }, [dailyQuests]);
+
+  // Sync state to Cloud
+  useEffect(() => {
+    if (user && isPro && db) {
+      const fetchCloudData = async () => {
+        try {
+          const docRef = doc(db, 'users', user.uid, 'data', 'sync');
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            if (data.tasks) setTasks(data.tasks);
+            if (data.points !== undefined) setPoints(data.points);
+            if (data.streak) setStreak(data.streak);
+            if (data.isGamified !== undefined) setIsGamified(data.isGamified);
+          }
+        } catch (error) {
+          console.error("Error fetching cloud data:", error);
+        }
+        setCloudSyncLoaded(true);
+      };
+      fetchCloudData();
+    } else {
+      setCloudSyncLoaded(true);
+    }
+  }, [user, isPro]);
+
+  useEffect(() => {
+    if (user && isPro && cloudSyncLoaded && db) {
+      const syncTimeout = setTimeout(() => {
+        const docRef = doc(db, 'users', user.uid, 'data', 'sync');
+        setDoc(docRef, {
+          tasks,
+          points,
+          streak,
+          isGamified,
+          updatedAt: new Date().toISOString()
+        }, { merge: true }).catch(err => console.error("Cloud Sync error:", err));
+      }, 1500); // 1.5s debounce
+      return () => clearTimeout(syncTimeout);
+    }
+  }, [tasks, points, streak, isGamified, user, isPro, cloudSyncLoaded]);
 
   // Timers
   useEffect(() => {

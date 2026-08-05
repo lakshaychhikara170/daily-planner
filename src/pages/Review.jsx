@@ -95,7 +95,7 @@ function Review() {
             style={{ 
               background: 'transparent', border: '1px solid var(--border-color)', borderRadius: '50%',
               width: '50px', height: '50px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: 'var(--text-color)', cursor: 'none', transition: 'all 0.2s ease', outline: 'none'
+              color: 'var(--text-color)',  transition: 'all 0.2s ease', outline: 'none'
             }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--text-color)'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}

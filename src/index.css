@@ -56,18 +56,20 @@ html, body {
   font-family: var(--font-sans);
   background-color: var(--bg-color);
   color: var(--text-color);
-  /* Hide default cursor for custom cursor */
-  cursor: none; 
+  /* Use default cursor for instant tactile feedback */
   overflow-x: hidden;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Ensure links and buttons don't have default cursor either, 
-   we will handle hover states with custom cursor */
-a, button, input {
-  cursor: none;
+/* Ensure links and buttons have standard pointer */
+a, button, input, .interactive {
+  cursor: pointer;
+}
+
+body.hide-cursor, body.hide-cursor * {
+  cursor: none !important;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -184,7 +186,7 @@ h1, h2, h3, h4, h5, h6 {
   padding: 1rem;
   display: flex;
   align-items: center;
-  cursor: none;
+  
   transition: background-color 0.2s ease;
 }
 .schedule-content:hover {

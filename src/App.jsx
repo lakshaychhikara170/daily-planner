@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import CustomCursor from './components/CustomCursor';
 import Home from './pages/Home';
 import Tasks from './pages/Tasks';
@@ -7,9 +7,14 @@ import Routines from './pages/Routines';
 import RoutinesV2 from './pages/RoutinesV2';
 import Review from './pages/Review';
 import Profile from './pages/Profile';
+import Login from './pages/Login';
+import Upgrade from './pages/Upgrade';
 import FloatingTimer from './components/FloatingTimer';
 import FullscreenTimer from './components/FullscreenTimer';
 import TaskCompletionPrompt from './components/TaskCompletionPrompt';
+import ProUpsellNotification from './components/ProUpsellNotification';
+import JurassicParkLock from './components/JurassicParkLock';
+import { AuthContext } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { EditModeProvider } from './context/EditModeContext';
 import ThemeEditor from './components/ThemeEditor';
@@ -21,6 +26,10 @@ import { startUnifiedNotificationScheduler } from './utils/notifications';
 function App() {
   const [currentHash, setCurrentHash] = useState(window.location.hash || '#/');
   const { updateAvailable, setUpdateAvailable } = useUpdateChecker();
+  
+  // Honeypot state
+  const { isPro, loading } = useContext(AuthContext);
+  const [showJurassicLock, setShowJurassicLock] = useState(false);
 
   useEffect(() => {
     if (!window.location.hash) {
@@ -39,6 +48,29 @@ function App() {
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
+  // Pirate Honeypot Detection
+  useEffect(() => {
+    if (loading) return;
+    
+    if (localStorage.getItem('execute_pro_license') === null) {
+      localStorage.setItem('execute_pro_license', 'false');
+    }
+    
+    const trapValue = localStorage.getItem('execute_pro_license');
+    if (trapValue === 'true' && !isPro) {
+      const punishmentStage = localStorage.getItem('punishment_stage');
+      if (!punishmentStage) {
+        localStorage.setItem('punishment_stage', '1');
+        window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+      } else {
+        setShowJurassicLock(true);
+      }
+    } else if (trapValue === 'false') {
+      setShowJurassicLock(false);
+      localStorage.removeItem('punishment_stage');
+    }
+  }, [isPro, loading, currentHash]);
+
   const getNavOpacity = (path) => {
     return currentHash === path ? 1 : 0.5;
   };
@@ -46,9 +78,10 @@ function App() {
   return (
     <ThemeProvider>
       <EditModeProvider>
+        <CustomCursor />
+        {showJurassicLock && <JurassicParkLock />}
         <UpdateBanner updateInfo={updateAvailable} onClose={() => setUpdateAvailable(null)} />
         <div style={{ paddingTop: updateAvailable ? '40px' : '0', transition: 'padding-top 0.3s ease' }}>
-          <CustomCursor />
           
           {/* Top Navigation */}
           <header className="border-b px-content" style={{ padding: '1.5rem 4vw', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -85,8 +118,7 @@ function App() {
                   alignItems: 'center',
                   gap: '0.5rem',
                   fontWeight: 500,
-                  cursor: 'none'
-                }}>
+                  }}>
                   New Task
                   <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: 'var(--accent-green)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-color)' }}>
                     +
@@ -102,10 +134,13 @@ function App() {
           {currentHash === '#/routines' && <Routines />}
           {currentHash === '#/review' && <Review />}
           {currentHash === '#/profile' && <Profile />}
+          {currentHash === '#/login' && <Login />}
+          {currentHash === '#/upgrade' && <Upgrade />}
           
           <FloatingTimer />
           <FullscreenTimer />
           <TaskCompletionPrompt />
+          <ProUpsellNotification />
           
           <GamificationHUD />
           <ThemeEditor />

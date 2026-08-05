@@ -362,7 +362,7 @@ function Tasks() {
                   title="Start Deep Work"
                   style={{
                     width: '100%', padding: '1.5rem', backgroundColor: 'var(--text-color)',
-                    color: 'var(--bg-color)', border: 'none', cursor: 'none',
+                    color: 'var(--bg-color)', border: 'none', 
                     display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', borderRadius: '4px',
                     fontFamily: 'var(--font-sans)', fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '0.1em',
                     zIndex: 10, transition: 'transform 0.2s ease, box-shadow 0.2s ease'

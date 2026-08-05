@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 
 // Hardcoded current version. When you build a new release, bump this!
-// We've set it to 1.0.0 so that our 1.1.0 version.json triggers the banner for testing.
-const CURRENT_VERSION = '1.0.0'; 
+// It matches version.json right now, so the banner won't show.
+const CURRENT_VERSION = '1.1.0'; 
 
 export function useUpdateChecker() {
   const [updateAvailable, setUpdateAvailable] = useState(null);
