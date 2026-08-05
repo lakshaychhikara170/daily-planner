@@ -4,6 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 export default function ProUpsellNotification() {
   const { isPro } = useContext(AuthContext);
   const [viewState, setViewState] = useState('hidden'); // 'hidden', 'fullscreen', 'toast', 'coffee_toast'
+  const [isIndia, setIsIndia] = useState(false);
   const timerRef = useRef(null);
   const showCountRef = useRef(0);
 
@@ -23,6 +24,15 @@ export default function ProUpsellNotification() {
     } else {
       // Returning user within 9 hours: show toast after 2 minutes
       scheduleNextToast(120000); 
+    }
+
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (tz === 'Asia/Kolkata' || tz === 'Asia/Calcutta') {
+        setIsIndia(true);
+      }
+    } catch (e) {
+      // fallback
     }
 
     return () => clearTimeout(timerRef.current);
@@ -142,7 +152,7 @@ export default function ProUpsellNotification() {
                 <li style={{ display: 'flex', gap: '0.75rem' }}><span style={{ color: 'var(--accent-green)' }}>[✓]</span> Real-time synchronization to Cloud</li>
                 <li style={{ display: 'flex', gap: '0.75rem' }}><span style={{ color: 'var(--accent-green)' }}>[✓]</span> Military-grade AES-256 Backups</li>
                 <li style={{ display: 'flex', gap: '0.75rem' }}><span style={{ color: 'var(--accent-green)' }}>[✓]</span> Seamless Multi-device Access (Mobile/Desktop)</li>
-                <li style={{ display: 'flex', gap: '0.75rem' }}><span style={{ color: 'var(--accent-green)' }}>[✓]</span> Single $9.99 Payment. No subscriptions.</li>
+                <li style={{ display: 'flex', gap: '0.75rem' }}><span style={{ color: 'var(--accent-green)' }}>[✓]</span> Single {isIndia ? '₹499' : '$9.99'} Payment. No subscriptions.</li>
               </ul>
             </div>
 
@@ -167,7 +177,7 @@ export default function ProUpsellNotification() {
                   width: '100%'
                 }}
               >
-                INITIALIZE UPGRADE - $9.99
+                INITIALIZE UPGRADE - {isIndia ? '₹499' : '$9.99'}
               </button>
               
               <button 
@@ -378,7 +388,7 @@ export default function ProUpsellNotification() {
               transition: 'all 0.2s ease',
             }}
           >
-            Activate Cloud Sync - $9.99
+            Activate Cloud Sync - {isIndia ? '₹499' : '$9.99'}
           </button>
         </div>
       </div>
