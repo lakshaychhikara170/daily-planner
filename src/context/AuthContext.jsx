@@ -1,13 +1,14 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { 
   onAuthStateChanged, 
-  signInWithEmailAndPassword, 
+  signInWithPopup,
   createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
   signOut,
+  sendPasswordResetEmail,
   GoogleAuthProvider,
   signInWithRedirect,
-  getRedirectResult,
-  sendPasswordResetEmail
+  getRedirectResult
 } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../utils/firebase';
