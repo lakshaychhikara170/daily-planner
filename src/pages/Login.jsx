@@ -243,6 +243,9 @@ export default function Login() {
           </svg>
           Google
         </button>
+        <p style={{ margin: '-1rem 0 0 0', textAlign: 'center', fontSize: '0.7rem', color: 'var(--dim-text)', fontFamily: 'var(--font-sans)', fontStyle: 'italic', lineHeight: '1.4' }}>
+          *If you use Brave or strict ad-blockers, Google login may fail.<br/>Please use Email & Password instead.
+        </p>
 
         <div style={{ textAlign: 'center', marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <button
