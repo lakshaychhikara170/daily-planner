@@ -33,23 +33,24 @@ export default async function handler(req, res) {
       return res.status(403).json({ message: "Forbidden: Not an admin" });
     }
 
-    /* 
-    const auth = getAuth();
-    const listUsersResult = await auth.listUsers(1000);
-    const usersList = await Promise.all(listUsersResult.users.map(async (userRecord) => {
-      const uDoc = await db.collection('users').doc(userRecord.uid).get();
-      const uData = uDoc.exists ? uDoc.data() : {};
-      return {
-        id: userRecord.uid,
-        email: userRecord.email,
-        isPro: uData.isPro || false,
-        isAdmin: uData.isAdmin || false
-      };
-    }));
-    */
+    // Fetch users directly from Firestore instead of Auth to avoid Vercel edge runtime crashes
+    const usersSnapshot = await db.collection('users').limit(1000).get();
+    const usersList = [];
     
-    // Return empty list for now to test if getAuth is crashing
-    return res.status(200).json({ users: [] });
+    usersSnapshot.forEach(doc => {
+      const uData = doc.data();
+      usersList.push({
+        id: doc.id,
+        email: uData.email || 'No Email',
+        displayName: uData.displayName || 'Anonymous',
+        isPro: uData.isPro || false,
+        isBanned: uData.isBanned || false,
+        isAdmin: uData.isAdmin || false,
+        proUpgradedAt: uData.proUpgradedAt || null
+      });
+    });
+
+    return res.status(200).json({ users: usersList });
   } catch (error) {
     console.error("Admin Users Error:", error);
     return res.status(500).json({ message: "Internal server error" });
