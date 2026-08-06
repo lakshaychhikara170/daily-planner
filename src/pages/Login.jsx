@@ -27,7 +27,15 @@ export default function Login() {
       }
       window.location.hash = '#/profile';
     } catch (err) {
-      setError(err.message);
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found') {
+        setError("Account not found or incorrect password. If you don't have a profile, click 'Create one' below.");
+      } else if (err.code === 'auth/email-already-in-use') {
+        setError("This email is already registered. Please click 'Login' below.");
+      } else if (err.code === 'auth/weak-password') {
+        setError("Password is too weak. Please use at least 6 characters.");
+      } else {
+        setError(err.message || "An error occurred during authentication.");
+      }
     }
   };
 
@@ -36,7 +44,11 @@ export default function Login() {
       await loginWithGoogle();
       window.location.hash = '#/profile';
     } catch (err) {
-      setError(err.message);
+      if (err.code === 'auth/popup-blocked') {
+        setError("Your browser blocked the Google login window. Please allow popups or use a different browser.");
+      } else {
+        setError(err.message || "Google login failed.");
+      }
     }
   };
 
