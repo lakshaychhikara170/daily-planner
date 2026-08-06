@@ -5,7 +5,9 @@ import {
   createUserWithEmailAndPassword, 
   signOut,
   GoogleAuthProvider,
-  signInWithRedirect
+  signInWithRedirect,
+  getRedirectResult,
+  sendPasswordResetEmail
 } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../utils/firebase';
@@ -38,6 +40,15 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
       return; // Firebase not configured yet
     }
+
+    // Handle Redirect Result for strict browsers (Brave, Safari)
+    getRedirectResult(auth).then((result) => {
+      if (result) {
+        console.log("Redirect login successful.");
+      }
+    }).catch((err) => {
+      console.error("Redirect login error:", err);
+    });
 
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
@@ -92,10 +103,15 @@ export const AuthProvider = ({ children }) => {
     return signOut(auth);
   };
 
+  const resetPassword = async (email) => {
+    if (!auth) throw new Error("Firebase not configured");
+    return sendPasswordResetEmail(auth, email);
+  };
+
   return (
     <AuthContext.Provider value={{ 
       user, isPro, loading, deferredPrompt,
-      loginWithGoogle, loginWithEmail, signupWithEmail, logout 
+      loginWithGoogle, loginWithEmail, signupWithEmail, logout, resetPassword
     }}>
       {children}
     </AuthContext.Provider>

@@ -2,11 +2,12 @@ import React, { useState, useContext, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 
 export default function Login() {
-  const { loginWithGoogle, loginWithEmail, signupWithEmail, user } = useContext(AuthContext);
+  const { loginWithGoogle, loginWithEmail, signupWithEmail, user, resetPassword } = useContext(AuthContext);
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [msg, setMsg] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -42,13 +43,28 @@ export default function Login() {
   const handleGoogle = async () => {
     try {
       await loginWithGoogle();
-      window.location.hash = '#/profile';
+      // We don't manually redirect here because getRedirectResult or onAuthStateChanged will handle it upon reload
     } catch (err) {
       if (err.code === 'auth/popup-blocked') {
         setError("Your browser blocked the Google login window. Please allow popups or use a different browser.");
       } else {
         setError(err.message || "Google login failed.");
       }
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError("Please enter your email address first to reset your password.");
+      return;
+    }
+    setError('');
+    setMsg('');
+    try {
+      await resetPassword(email);
+      setMsg("Password reset email sent! Check your inbox.");
+    } catch (err) {
+      setError(err.message);
     }
   };
 
@@ -67,6 +83,12 @@ export default function Login() {
         {error && (
           <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.5)', color: '#ef4444', padding: '1rem', borderRadius: '8px', textAlign: 'center', fontFamily: 'var(--font-sans)', fontSize: '0.85rem', textTransform: 'uppercase' }}>
             {error}
+          </div>
+        )}
+
+        {msg && (
+          <div style={{ backgroundColor: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.5)', color: '#22c55e', padding: '1rem', borderRadius: '8px', textAlign: 'center', fontFamily: 'var(--font-sans)', fontSize: '0.85rem', textTransform: 'uppercase' }}>
+            {msg}
           </div>
         )}
 
@@ -194,7 +216,7 @@ export default function Login() {
           Google
         </button>
 
-        <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+        <div style={{ textAlign: 'center', marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <button
             onClick={() => setIsLogin(!isLogin)}
             className="interactive"
@@ -213,6 +235,25 @@ export default function Login() {
           >
             {isLogin ? 'No profile? Create one.' : 'Already operative? Login.'}
           </button>
+
+          {isLogin && (
+            <button
+              onClick={handleForgotPassword}
+              className="interactive"
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--dim-text)',
+                fontFamily: 'var(--font-sans)',
+                fontSize: '0.75rem',
+                textTransform: 'uppercase',
+                }}
+              onMouseEnter={(e) => e.target.style.color = 'var(--text-color)'}
+              onMouseLeave={(e) => e.target.style.color = 'var(--dim-text)'}
+            >
+              Forgot Password?
+            </button>
+          )}
         </div>
       </div>
     </div>
