@@ -5,7 +5,7 @@ import {
   createUserWithEmailAndPassword, 
   signOut,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithRedirect
 } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../utils/firebase';
@@ -74,7 +74,7 @@ export const AuthProvider = ({ children }) => {
   const loginWithGoogle = async () => {
     if (!auth) throw new Error("Firebase not configured");
     const provider = new GoogleAuthProvider();
-    return signInWithPopup(auth, provider);
+    return signInWithRedirect(auth, provider);
   };
 
   const loginWithEmail = async (email, password) => {
