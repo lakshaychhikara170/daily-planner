@@ -9,6 +9,7 @@ import Review from './pages/Review';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
 import Upgrade from './pages/Upgrade';
+import Admin from './pages/Admin';
 import FloatingTimer from './components/FloatingTimer';
 import FullscreenTimer from './components/FullscreenTimer';
 import TaskCompletionPrompt from './components/TaskCompletionPrompt';
@@ -28,7 +29,7 @@ function App() {
   const { updateAvailable, setUpdateAvailable } = useUpdateChecker();
   
   // Honeypot state
-  const { isPro, loading } = useContext(AuthContext);
+  const { isPro, isAdmin, loading } = useContext(AuthContext);
   const [showJurassicLock, setShowJurassicLock] = useState(false);
 
   useEffect(() => {
@@ -97,6 +98,7 @@ function App() {
               <a href="#/routines" className="interactive" style={{ opacity: getNavOpacity('#/routines'), textDecoration: 'none', color: 'inherit' }}>03 Routines</a>
               <a href="#/review" className="interactive" style={{ opacity: getNavOpacity('#/review'), textDecoration: 'none', color: 'inherit' }}>04 Review</a>
               <a href="#/profile" className="interactive" style={{ opacity: getNavOpacity('#/profile'), textDecoration: 'none', color: 'inherit' }}>05 Profile</a>
+              {isAdmin && <a href="#/admin" className="interactive" style={{ opacity: getNavOpacity('#/admin'), textDecoration: 'none', color: 'var(--accent-red)' }}>06 Admin</a>}
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
@@ -136,6 +138,7 @@ function App() {
           {currentHash === '#/profile' && <Profile />}
           {currentHash === '#/login' && <Login />}
           {currentHash === '#/upgrade' && <Upgrade />}
+          {currentHash === '#/admin' && <Admin />}
           
           <FloatingTimer />
           <FullscreenTimer />

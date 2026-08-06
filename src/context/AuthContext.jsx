@@ -18,6 +18,7 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isPro, setIsPro] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
 
@@ -52,29 +53,46 @@ export const AuthProvider = ({ children }) => {
     });
 
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      
       if (currentUser && db) {
-        // Fetch user data from Firestore to check Pro status
+        // Fetch user data from Firestore to check Pro/Admin/Ban status
         const userDocRef = doc(db, 'users', currentUser.uid);
         try {
           const userDoc = await getDoc(userDocRef);
           if (userDoc.exists()) {
-            setIsPro(userDoc.data().isPro || false);
+            const data = userDoc.data();
+            if (data.isBanned) {
+              alert("Your account has been banned due to a violation of our terms of service.");
+              signOut(auth);
+              setUser(null);
+              setIsPro(false);
+              setIsAdmin(false);
+              setLoading(false);
+              return;
+            }
+            setUser(currentUser);
+            setIsPro(data.isPro || false);
+            setIsAdmin(data.isAdmin || false);
           } else {
             // Create user document if it doesn't exist
             await setDoc(userDocRef, {
               email: currentUser.email,
               isPro: false,
+              isAdmin: false,
+              isBanned: false,
               createdAt: new Date().toISOString()
             });
+            setUser(currentUser);
             setIsPro(false);
+            setIsAdmin(false);
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
+          setUser(currentUser);
         }
       } else {
+        setUser(null);
         setIsPro(false);
+        setIsAdmin(false);
       }
       
       setLoading(false);
@@ -111,7 +129,7 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={{ 
-      user, isPro, loading, deferredPrompt,
+      user, isPro, isAdmin, loading, deferredPrompt,
       loginWithGoogle, loginWithEmail, signupWithEmail, logout, resetPassword
     }}>
       {children}

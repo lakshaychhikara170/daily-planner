@@ -9,6 +9,7 @@ export default function Upgrade() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [pendingVerification, setPendingVerification] = useState(null);
+  const [prices, setPrices] = useState({ razorpayPrice: 49900, paypalPrice: 9.99 });
 
   const [isIndia, setIsIndia] = useState(false);
 
@@ -31,6 +32,15 @@ export default function Upgrade() {
     } catch (e) {
       // fallback
     }
+
+    // Fetch dynamic prices
+    fetch('/api/get-prices')
+      .then(res => res.json())
+      .then(data => {
+        if (data) setPrices(data);
+      })
+      .catch(err => console.error("Could not load dynamic prices", err));
+
   }, [user, isPro]);
 
   if (!user || isPro) return null;
@@ -181,7 +191,7 @@ export default function Upgrade() {
         <div style={{ backgroundColor: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '2rem' }}>
           <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
             <div style={{ fontSize: '3rem', fontFamily: 'var(--font-serif)', fontWeight: 'bold', marginBottom: '0.5rem' }}>
-              {isIndia ? '₹499' : '$9.99'}
+              {isIndia ? `₹${prices.razorpayPrice / 100}` : `$${prices.paypalPrice}`}
             </div>
             <div style={{ color: 'var(--dim-text)', fontFamily: 'var(--font-sans)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>One-time payment</div>
           </div>
@@ -253,7 +263,7 @@ export default function Upgrade() {
                       purchase_units: [
                         {
                           amount: {
-                            value: "9.99",
+                            value: prices.paypalPrice.toString(),
                             currency_code: "USD"
                           }
                         }

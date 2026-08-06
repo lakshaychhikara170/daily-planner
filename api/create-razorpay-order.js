@@ -1,11 +1,27 @@
 import Razorpay from 'razorpay';
+import { getApps, initializeApp, cert } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+
+// Initialize Firebase Admin only once
+if (!getApps().length) {
+  try {
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    if (serviceAccount.private_key) {
+      serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
+    }
+    initializeApp({
+      credential: cert(serviceAccount)
+    });
+  } catch (error) {
+    console.error("Firebase Admin initialization failed.", error);
+  }
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method Not Allowed' });
   }
 
-  // To test locally, you MUST set these environment variables!
   const { RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET } = process.env;
 
   if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
@@ -19,10 +35,20 @@ export default async function handler(req, res) {
       key_secret: RAZORPAY_KEY_SECRET,
     });
 
-    // Pro License costs $9.99 globally, but we offer Regional Pricing for India at ₹499.
-    // Razorpay amount is in PAISE (1 INR = 100 Paise). So 499 INR = 49900 paise.
+    let amountPaise = 49900; // Default fallback
+
+    try {
+      const db = getFirestore();
+      const settingsDoc = await db.collection('system').doc('settings').get();
+      if (settingsDoc.exists) {
+        amountPaise = settingsDoc.data().razorpayPrice || 49900;
+      }
+    } catch (e) {
+      console.warn("Could not fetch pricing from DB, using fallback", e);
+    }
+
     const options = {
-      amount: 49900, 
+      amount: amountPaise,
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
       payment_capture: 1 // Auto capture
