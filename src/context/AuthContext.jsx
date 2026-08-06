@@ -85,7 +85,7 @@ export const AuthProvider = ({ children }) => {
   const loginWithGoogle = async () => {
     if (!auth) throw new Error("Firebase not configured");
     const provider = new GoogleAuthProvider();
-    return signInWithRedirect(auth, provider);
+    return signInWithPopup(auth, provider);
   };
 
   const loginWithEmail = async (email, password) => {

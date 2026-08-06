@@ -44,7 +44,7 @@ export default function Login() {
   const handleGoogle = async () => {
     try {
       await loginWithGoogle();
-      // We don't manually redirect here because getRedirectResult or onAuthStateChanged will handle it upon reload
+      window.location.hash = '#/profile';
     } catch (err) {
       if (err.code === 'auth/popup-blocked') {
         setError("Your browser blocked the Google login window. Please allow popups or use a different browser.");
