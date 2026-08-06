@@ -27,7 +27,7 @@ export default function Upgrade() {
     try {
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
       if (tz === 'Asia/Kolkata' || tz === 'Asia/Calcutta') {
-        setIsIndia(true);
+        // setIsIndia(true); // Temporarily disabled for screenshots
       }
     } catch (e) {
       // fallback
