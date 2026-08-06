@@ -19,12 +19,12 @@ function Admin() {
       setIsLoadingData(true);
       try {
         if (activeTab === 'users') {
-          const res = await fetch(`/api/admin/users?uid=${user.uid}`);
+          const res = await fetch(`/api/admin-users?uid=${user.uid}`);
           if (res.ok) {
             setUsers(await res.json());
           }
         } else if (activeTab === 'settings') {
-          const res = await fetch(`/api/admin/settings?uid=${user.uid}`);
+          const res = await fetch(`/api/admin-settings?uid=${user.uid}`);
           if (res.ok) {
             setSettings(await res.json());
           }
@@ -41,7 +41,7 @@ function Admin() {
   const handleUserAction = async (targetUid, action) => {
     setStatusMsg('');
     try {
-      const res = await fetch('/api/admin/update-user', {
+      const res = await fetch('/api/admin-update-user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ adminUid: user.uid, targetUid, action })
@@ -72,7 +72,7 @@ function Admin() {
     e.preventDefault();
     setStatusMsg('Saving...');
     try {
-      const res = await fetch(`/api/admin/settings?uid=${user.uid}`, {
+      const res = await fetch(`/api/admin-settings?uid=${user.uid}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(settings)
