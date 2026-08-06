@@ -17,13 +17,15 @@ if (!getApps().length) {
 }
 
 export default async function handler(req, res) {
-  const { uid } = req.query; // Usually passed in query or headers
-
-  if (!uid) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-
   try {
+    // Safely parse URL to get uid (since req.query might be undefined in some Vercel environments)
+    const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+    const uid = url.searchParams.get('uid');
+
+    if (!uid) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
     const db = getFirestore();
     const userDoc = await db.collection('users').doc(uid).get();
     
@@ -40,7 +42,10 @@ export default async function handler(req, res) {
     }
     
     if (req.method === 'POST') {
-      const { razorpayPrice, paypalPrice } = req.body;
+      const { razorpayPrice, paypalPrice } = req.body || {};
+      if (!razorpayPrice || !paypalPrice) {
+         return res.status(400).json({ message: "Missing prices" });
+      }
       await db.collection('system').doc('settings').set({
         razorpayPrice: Number(razorpayPrice),
         paypalPrice: Number(paypalPrice)
