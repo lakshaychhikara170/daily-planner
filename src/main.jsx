@@ -7,7 +7,7 @@ import { AuthProvider } from './context/AuthContext.jsx'
 import { PayPalScriptProvider } from '@paypal/react-paypal-js'
 
 const paypalOptions = {
-  "client-id": "test", // Temporarily using 'test' to bypass invalid Client ID
+  "client-id": import.meta.env.VITE_PAYPAL_CLIENT_ID || "test",
   currency: "USD",
   intent: "capture"
 };
