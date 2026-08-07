@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { PayPalButtons } from "@paypal/react-paypal-js";
+import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../utils/firebase';
 
@@ -243,31 +243,33 @@ export default function Upgrade() {
                   <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', backgroundColor: 'var(--border-color)', zIndex: 0 }}></div>
                 </div>
 
-                <PayPalButtons 
-                  style={{ 
-                    layout: "vertical", 
-                    color: "white", 
-                    shape: "rect",
-                    label: "checkout"
-                  }}
-                  createOrder={(data, actions) => {
-                    return actions.order.create({
-                      purchase_units: [
-                        {
-                          amount: {
-                            value: prices.paypalPrice.toString(),
-                            currency_code: "USD"
+                <PayPalScriptProvider options={{ "client-id": import.meta.env.VITE_PAYPAL_CLIENT_ID || "test", currency: "USD", intent: "capture" }}>
+                  <PayPalButtons 
+                    style={{ 
+                      layout: "vertical", 
+                      color: "white", 
+                      shape: "rect",
+                      label: "checkout"
+                    }}
+                    createOrder={(data, actions) => {
+                      return actions.order.create({
+                        purchase_units: [
+                          {
+                            amount: {
+                              value: prices.paypalPrice.toString(),
+                              currency_code: "USD"
+                            }
                           }
-                        }
-                      ]
-                    });
-                  }}
-                  onApprove={handlePayPalApprove}
-                  onError={(err) => {
-                    console.error(err);
-                    setError("An error occurred during checkout.");
-                  }}
-                />
+                        ]
+                      });
+                    }}
+                    onApprove={handlePayPalApprove}
+                    onError={(err) => {
+                      console.error(err);
+                      setError("An error occurred during checkout.");
+                    }}
+                  />
+                </PayPalScriptProvider>
               </div>
             </div>
           )}
