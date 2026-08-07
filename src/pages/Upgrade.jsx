@@ -11,8 +11,6 @@ export default function Upgrade() {
   const [pendingVerification, setPendingVerification] = useState(null);
   const [prices, setPrices] = useState({ razorpayPrice: 49900, paypalPrice: 9.99 });
 
-  const [isIndia, setIsIndia] = useState(false);
-
   useEffect(() => {
     // If not logged in, force them to login first
     if (!user) {
@@ -21,16 +19,6 @@ export default function Upgrade() {
     // If already Pro, send them back to profile
     else if (isPro) {
       window.location.hash = '#/profile';
-    }
-
-    // Detect if user is in India based on Timezone
-    try {
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      if (tz === 'Asia/Kolkata' || tz === 'Asia/Calcutta') {
-        setIsIndia(true);
-      }
-    } catch (e) {
-      // fallback
     }
 
     // Fetch dynamic prices
@@ -191,7 +179,7 @@ export default function Upgrade() {
         <div style={{ backgroundColor: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '2rem' }}>
           <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
             <div style={{ fontSize: '3rem', fontFamily: 'var(--font-serif)', fontWeight: 'bold', marginBottom: '0.5rem' }}>
-              {isIndia ? `₹${prices.razorpayPrice / 100}` : `$${prices.paypalPrice}`}
+              ${prices.paypalPrice} <span style={{ fontSize: '1.5rem', color: 'var(--dim-text)', fontWeight: 'normal' }}>or ₹{prices.razorpayPrice / 100}</span>
             </div>
             <div style={{ color: 'var(--dim-text)', fontFamily: 'var(--font-sans)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>One-time payment</div>
           </div>
@@ -226,7 +214,7 @@ export default function Upgrade() {
                 </div>
               )}
               
-              {isIndia ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 <button 
                   onClick={handleRazorpayClick}
                   className="interactive"
@@ -239,7 +227,6 @@ export default function Upgrade() {
                     textTransform: 'uppercase',
                     fontWeight: 'bold',
                     letterSpacing: '0.1em',
-                    
                     transition: 'all 0.2s ease',
                     width: '100%',
                     display: 'flex',
@@ -248,9 +235,14 @@ export default function Upgrade() {
                     gap: '0.5rem'
                   }}
                 >
-                  Pay via UPI / Cards
+                  Pay via UPI / Cards (India)
                 </button>
-              ) : (
+                
+                <div style={{ textAlign: 'center', color: 'var(--dim-text)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.1em', position: 'relative' }}>
+                  <span style={{ backgroundColor: 'var(--card-bg)', padding: '0 10px', position: 'relative', zIndex: 1 }}>Or pay via PayPal (Global)</span>
+                  <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', backgroundColor: 'var(--border-color)', zIndex: 0 }}></div>
+                </div>
+
                 <PayPalButtons 
                   style={{ 
                     layout: "vertical", 
@@ -276,7 +268,7 @@ export default function Upgrade() {
                     setError("An error occurred during checkout.");
                   }}
                 />
-              )}
+              </div>
             </div>
           )}
         </div>
