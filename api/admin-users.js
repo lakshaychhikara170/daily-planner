@@ -50,7 +50,7 @@ export default async function handler(req, res) {
       });
     });
 
-    return res.status(200).json({ users: usersList });
+    return res.status(200).json(usersList);
   } catch (error) {
     console.error("Admin Users Error:", error);
     return res.status(500).json({ message: "Internal server error" });
