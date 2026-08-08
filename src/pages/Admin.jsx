@@ -271,6 +271,10 @@ function Admin() {
             width: '100%', padding: '1rem', background: 'var(--text-color)', 
             color: 'var(--bg-color)', border: 'none', borderRadius: '4px', fontWeight: 600
           }}>
+            Save Settings
+          </button>
+        </form>
+      )}
       {activeTab === 'notifications' && (
         <div style={{ maxWidth: '800px' }}>
           <h2 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', fontWeight: 600 }}>Test UI Notifications & Popups</h2>
