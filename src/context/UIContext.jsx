@@ -22,6 +22,16 @@ export function UIContextProvider({ children }) {
   // Smart Reminders: contextual popups (bottom right)
   const [reminder, setReminder] = useState(null);
 
+  // Notification Aesthetic Style
+  const [notificationStyle, setNotificationStyle] = useState(() => {
+    return localStorage.getItem('dailyPlannerNotificationStyle') || 'minimal';
+  });
+
+  const changeNotificationStyle = useCallback((style) => {
+    setNotificationStyle(style);
+    localStorage.setItem('dailyPlannerNotificationStyle', style);
+  }, []);
+
   // --- Actions ---
 
   const addToast = useCallback((message, type = 'success', duration = 3000) => {
@@ -85,7 +95,8 @@ export function UIContextProvider({ children }) {
     notifications, addNotification, removeNotification,
     confirmConfig, showConfirm, hideConfirm,
     celebration, showCelebration, hideCelebration,
-    reminder, showReminder, hideReminder
+    reminder, showReminder, hideReminder,
+    notificationStyle, changeNotificationStyle
   };
 
   return (

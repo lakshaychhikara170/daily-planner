@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { useUI } from '../../context/UIContext';
 
 export default function Toast({ toast, onClose }) {
+  const { notificationStyle } = useUI();
   const [isHiding, setIsHiding] = useState(false);
   
   useEffect(() => {
@@ -21,6 +23,46 @@ export default function Toast({ toast, onClose }) {
 
   const styleObj = getStyle();
 
+  if (notificationStyle === 'minimal') {
+    // Brutalist / Minimal aesthetic
+    return (
+      <div style={{
+        backgroundColor: 'var(--card-bg)',
+        color: 'var(--text-color)',
+        border: '1px solid var(--text-color)',
+        boxShadow: '4px 4px 0px var(--text-color)',
+        display: 'flex',
+        flexDirection: 'column',
+        pointerEvents: 'auto',
+        animation: isHiding ? 'slideOutRight 0.3s forwards' : 'slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+        minWidth: '320px',
+        overflow: 'hidden'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.25rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ color: toast.type === 'error' ? 'var(--accent-red)' : toast.type === 'success' ? 'var(--accent-green)' : 'var(--text-color)', display: 'flex', alignItems: 'center' }}>
+              {styleObj.icon}
+            </div>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{toast.message}</span>
+          </div>
+          <button 
+            onClick={() => { setIsHiding(true); setTimeout(onClose, 300); }} 
+            className="interactive"
+            style={{ 
+              background: 'none', border: 'none', color: 'var(--dim-text)',
+              cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center'
+            }}
+          >
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Modern / Premium Neon Aesthetic
   return (
     <div style={{
       backgroundColor: '#1f2937',

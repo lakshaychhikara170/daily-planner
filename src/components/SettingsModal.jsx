@@ -1,9 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { AuthContext } from '../context/AuthContext';
+import { useUI } from '../context/UIContext';
 
 function SettingsModal({ isOpen, onClose }) {
   const [theme, setTheme] = useState(() => localStorage.getItem('dailyPlannerTheme') || 'system');
   const fileInputRef = useRef(null);
+  
+  const { notificationStyle, changeNotificationStyle } = useUI();
+  const { isPro } = useContext(AuthContext);
 
   useEffect(() => {
     localStorage.setItem('dailyPlannerTheme', theme);
@@ -111,6 +116,39 @@ function SettingsModal({ isOpen, onClose }) {
                   title="Dark Theme"
                 >
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <h3 style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.6, marginBottom: '1rem', color: 'var(--text-color)' }}>Notification Style</h3>
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <button
+                  className="interactive"
+                  onClick={() => changeNotificationStyle('minimal')}
+                  style={{ flex: 1, padding: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', backgroundColor: notificationStyle === 'minimal' ? 'var(--text-color)' : 'transparent', color: notificationStyle === 'minimal' ? 'var(--bg-color)' : 'var(--text-color)', border: '1px solid var(--border-color)', borderRadius: '4px' }}
+                >
+                  <span style={{ fontWeight: 600 }}>Minimal</span>
+                  <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>Classic Brutalist</span>
+                </button>
+                <button
+                  className="interactive"
+                  onClick={() => { if (isPro) changeNotificationStyle('modern'); }}
+                  style={{ 
+                    flex: 1, padding: '1rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', 
+                    backgroundColor: notificationStyle === 'modern' ? 'var(--text-color)' : 'transparent', 
+                    color: notificationStyle === 'modern' ? 'var(--bg-color)' : 'var(--text-color)', 
+                    border: '1px solid var(--border-color)', borderRadius: '4px',
+                    opacity: isPro ? 1 : 0.5,
+                    cursor: isPro ? 'pointer' : 'not-allowed'
+                  }}
+                  title={!isPro ? "Requires PRO License" : "Modern Dark Aesthetic"}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{ fontWeight: 600 }}>Modern</span>
+                    {!isPro && <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>}
+                  </div>
+                  <span style={{ fontSize: '0.75rem', opacity: 0.7 }}>Neon Dark Mode</span>
                 </button>
               </div>
             </div>
