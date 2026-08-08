@@ -48,54 +48,117 @@ export default function Profile() {
         
         {/* Profile Section */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          <h2 style={{ fontSize: '1.25rem', fontFamily: 'var(--font-serif)', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
-            Profile Details
-          </h2>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--dim-text)', marginBottom: '0.5rem' }}>Email Address</label>
-              <div style={{ fontSize: '1.1rem', fontFamily: 'var(--font-sans)', fontWeight: 500 }}>
-                {user ? user.email : 'Local Operator (Offline)'}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
+            <h2 style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 600, color: 'var(--text-color)', margin: 0 }}>
+              Profile Details
+            </h2>
+            <button className="interactive" style={{ background: 'none', border: 'none', color: 'var(--text-color)', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600, padding: 0 }}>
+              <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+              Edit
+            </button>
+          </div>
+          
+          {/* Avatar and Info */}
+          <div style={{ display: 'flex', gap: '2.5rem', alignItems: 'flex-start' }}>
+            {/* Avatar */}
+            <div style={{ position: 'relative', flexShrink: 0 }}>
+              <div style={{ width: '100px', height: '100px', backgroundColor: 'var(--border-color)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="60" height="60" viewBox="0 0 24 24" fill="var(--text-color)">
+                  <path d="M12 2L22 7.77V16.23L12 22L2 16.23V7.77L12 2Z"/>
+                </svg>
               </div>
-              {!user && (
-                <button 
-                  onClick={() => window.location.hash = '#/login'}
-                  className="interactive mt-2" 
-                  style={{ fontSize: '0.75rem', fontWeight: 600, padding: '0.5rem 1rem', borderRadius: '8px', backgroundColor: 'var(--text-color)', color: 'var(--bg-color)', border: 'none', }}
-                >
-                  LOGIN TO CLOUD
-                </button>
-              )}
+              <div style={{ position: 'absolute', bottom: '0', right: '0', width: '28px', height: '28px', backgroundColor: 'var(--accent-green)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '3px solid var(--bg-color)' }}>
+                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="var(--bg-color)"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+              </div>
             </div>
             
-            <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--dim-text)', marginBottom: '0.5rem' }}>License Status</label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', backgroundColor: 'var(--card-bg)', border: `1px solid ${isPro ? 'var(--accent-green)' : 'var(--border-color)'}`, color: 'var(--text-color)', padding: '0.25rem 0.75rem', borderRadius: '16px', fontSize: '0.85rem', fontWeight: 600 }}>
+            {/* Right side info */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', paddingTop: '0.75rem' }}>
+              <div>
+                <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--dim-text)', marginBottom: '0.35rem', fontWeight: 600 }}>Email Address</div>
+                <div style={{ fontSize: '1.15rem', fontWeight: 500, color: 'var(--text-color)' }}>{user ? user.email : 'Local Operator (Offline)'}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--dim-text)', marginBottom: '0.5rem', fontWeight: 600 }}>License Status</div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', border: `1px solid ${isPro ? 'var(--accent-green)' : 'var(--border-color)'}`, borderRadius: '20px', padding: '0.35rem 0.85rem', fontSize: '0.75rem', fontWeight: 'bold' }}>
                   <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isPro ? 'var(--accent-green)' : 'var(--dim-text)' }}></div>
                   {isPro ? 'LIFETIME PRO ACTIVATED' : 'FREE / LOCAL ONLY'}
                 </div>
-                {user && !isPro && (
-                  <button 
-                    onClick={() => window.location.hash = '#/upgrade'}
-                    className="interactive" 
-                    style={{ fontSize: '0.75rem', fontWeight: 600, padding: '0.35rem 1rem', borderRadius: '16px', backgroundColor: 'transparent', color: 'var(--text-color)', border: '1px solid var(--text-color)', }}
-                  >
-                    UPGRADE TO PRO
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--dim-text)', marginBottom: '0.5rem' }}>Current Level</label>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '1rem' }}>
-                <span style={{ fontSize: '3rem', fontFamily: 'var(--font-serif)' }}>04</span>
-                <span style={{ fontSize: '0.85rem', color: 'var(--dim-text)' }}>1,450 XP Total</span>
               </div>
             </div>
           </div>
+
+          {/* Stats Row */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem', borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)', padding: '1.5rem 0' }}>
+            {/* CURRENT LEVEL */}
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--dim-text)', marginBottom: '0.75rem', fontWeight: 600 }}>Current Level</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                <span style={{ fontSize: '2.5rem', fontFamily: 'var(--font-serif)', lineHeight: 1 }}>04</span>
+                <div style={{ width: '32px', height: '32px', backgroundColor: 'rgba(196, 243, 70, 0.2)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="var(--text-color)" strokeWidth="2"><path d="M7 17L17 7M17 7H9M17 7v8"/></svg>
+                </div>
+              </div>
+              <div style={{ height: '3px', width: '100%', backgroundColor: 'var(--border-color)', marginBottom: '0.75rem' }}>
+                <div style={{ width: '80%', height: '100%', backgroundColor: 'var(--accent-green)' }}></div>
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--dim-text)' }}>1,450 XP Total</div>
+            </div>
+
+            {/* NEXT LEVEL */}
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--dim-text)', marginBottom: '0.75rem', fontWeight: 600 }}>Next Level</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                <span style={{ fontSize: '2.5rem', fontFamily: 'var(--font-serif)', lineHeight: 1 }}>05</span>
+                <div style={{ width: '32px', height: '32px', backgroundColor: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="var(--text-color)" strokeWidth="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><path d="M12 2v4m0 12v4m10-10h-4M6 12H2"/></svg>
+                </div>
+              </div>
+              <div style={{ height: '3px', width: '100%', backgroundColor: 'var(--border-color)', marginBottom: '0.75rem' }}></div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--dim-text)' }}>550 XP to go</div>
+            </div>
+
+            {/* MEMBER SINCE */}
+            <div style={{ display: 'flex', flexDirection: 'column', paddingLeft: '1.5rem', borderLeft: '1px solid var(--border-color)' }}>
+              <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--dim-text)', marginBottom: '0.75rem', fontWeight: 600 }}>Member Since</div>
+              <div style={{ fontSize: '1.75rem', fontFamily: 'var(--font-serif)', lineHeight: 1.2, marginBottom: '0.75rem', whiteSpace: 'nowrap' }}>
+                AUG 2026
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ width: '28px', height: '28px', backgroundColor: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--dim-text)' }}>12 days ago</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Consistency Box */}
+          <div style={{ backgroundColor: 'rgba(196, 243, 70, 0.08)', border: '1px solid rgba(196, 243, 70, 0.2)', borderRadius: '8px', padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+            <div style={{ flexShrink: 0 }}>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="var(--accent-green)" stroke="var(--text-color)" strokeWidth="1.5">
+                <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
+              </svg>
+            </div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 'bold', color: 'var(--text-color)', marginBottom: '0.35rem', fontSize: '0.95rem' }}>Consistency is your superpower.</div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--dim-text)', lineHeight: 1.4 }}>Keep showing up. The results will<br/>take care of themselves.</div>
+            </div>
+            <div style={{ borderLeft: '1px solid rgba(196, 243, 70, 0.2)', paddingLeft: '1.5rem', display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+              <div>
+                <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--dim-text)', marginBottom: '0.25rem', fontWeight: 600 }}>XP Earned</div>
+                <div style={{ fontSize: '1.75rem', fontFamily: 'var(--font-serif)', color: 'var(--text-color)', lineHeight: 1 }}>1,450</div>
+                <div style={{ fontSize: '0.65rem', color: 'var(--dim-text)', marginTop: '0.25rem' }}>Keep building.</div>
+              </div>
+              <div style={{ width: '40px', height: '40px', backgroundColor: 'var(--bg-color)', borderRadius: '6px', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: '4px', padding: '8px', border: '1px solid var(--border-color)' }}>
+                <div style={{ width: '6px', height: '40%', backgroundColor: 'var(--accent-green)', borderRadius: '2px' }}></div>
+                <div style={{ width: '6px', height: '70%', backgroundColor: 'var(--accent-green)', borderRadius: '2px' }}></div>
+                <div style={{ width: '6px', height: '100%', backgroundColor: 'var(--accent-green)', borderRadius: '2px' }}></div>
+              </div>
+            </div>
+          </div>
+
         </div>
 
         {/* Settings Section */}
