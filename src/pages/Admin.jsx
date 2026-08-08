@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
+import { useUI } from '../context/UIContext';
 
 function Admin() {
   const { user, isAdmin, loading } = useContext(AuthContext);
+  const { showConfirm, addToast, showCelebration } = useUI();
   const [activeTab, setActiveTab] = useState('users');
   const [users, setUsers] = useState([]);
-  const [settings, setSettings] = useState({ razorpayPrice: 49900, paypalPrice: 9.99 });
+  const [settings, setSettings] = useState({ razorpayPrice: 49900, paypalPrice: 9.99, notificationFrequency: 'daily' });
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [statusMsg, setStatusMsg] = useState('');
 
@@ -134,6 +136,19 @@ function Admin() {
           }}>
           System Settings
         </button>
+        <button 
+          onClick={() => setActiveTab('notifications')}
+          className="interactive"
+          style={{
+            background: activeTab === 'notifications' ? 'var(--text-color)' : 'transparent',
+            color: activeTab === 'notifications' ? 'var(--bg-color)' : 'var(--text-color)',
+            border: '1px solid var(--text-color)',
+            padding: '0.5rem 1rem',
+            borderRadius: '4px',
+            fontWeight: 500
+          }}>
+          Test Notifications
+        </button>
       </div>
 
       {statusMsg && (
@@ -233,6 +248,25 @@ function Admin() {
             />
           </div>
 
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>
+              Global Notification Frequency
+              <span style={{ display: 'block', fontSize: '0.8rem', opacity: 0.6 }}>How often system reminders are sent out.</span>
+            </label>
+            <select
+              value={settings.notificationFrequency}
+              onChange={(e) => setSettings({...settings, notificationFrequency: e.target.value})}
+              style={{
+                width: '100%', padding: '0.75rem', background: 'var(--bg-color)', 
+                color: 'var(--text-color)', border: '1px solid var(--border-color)', borderRadius: '4px'
+              }}
+            >
+              <option value="hourly">Hourly</option>
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+            </select>
+          </div>
+
           <button type="submit" className="interactive" style={{
             width: '100%', padding: '1rem', background: 'var(--text-color)', 
             color: 'var(--bg-color)', border: 'none', borderRadius: '4px', fontWeight: 600
@@ -240,6 +274,56 @@ function Admin() {
             Save Settings
           </button>
         </form>
+      )}
+      {activeTab === 'notifications' && (
+        <div style={{ maxWidth: '600px' }}>
+          <h2 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', fontWeight: 600 }}>Test UI Notifications</h2>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ padding: '1rem', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
+              <h3 style={{ marginBottom: '0.5rem', fontWeight: 600 }}>Toast Notification</h3>
+              <p style={{ fontSize: '0.85rem', opacity: 0.7, marginBottom: '1rem' }}>Fires a small notification in the bottom right corner.</p>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button onClick={() => addToast('System operating normally.', 'default')} className="interactive" style={{ padding: '0.5rem 1rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-color)' }}>Test Default</button>
+                <button onClick={() => addToast('Data synced successfully.', 'success')} className="interactive" style={{ padding: '0.5rem 1rem', borderRadius: '4px', border: '1px solid var(--accent-green)', background: 'transparent', color: 'var(--text-color)' }}>Test Success</button>
+                <button onClick={() => addToast('Connection lost.', 'error')} className="interactive" style={{ padding: '0.5rem 1rem', borderRadius: '4px', border: '1px solid var(--accent-red)', background: 'transparent', color: 'var(--text-color)' }}>Test Error</button>
+              </div>
+            </div>
+
+            <div style={{ padding: '1rem', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
+              <h3 style={{ marginBottom: '0.5rem', fontWeight: 600 }}>Confirmation Modal</h3>
+              <p style={{ fontSize: '0.85rem', opacity: 0.7, marginBottom: '1rem' }}>Fires a blocking modal requiring user choice.</p>
+              <button 
+                onClick={() => showConfirm({
+                  title: "Test Destructive Action",
+                  message: "Are you sure you want to test this? It will show a success toast if you confirm.",
+                  confirmText: "Yes, Execute",
+                  isDestructive: true,
+                  onConfirm: () => addToast('Confirmed execution.', 'success')
+                })} 
+                className="interactive" style={{ padding: '0.5rem 1rem', borderRadius: '4px', border: 'none', background: 'var(--text-color)', color: 'var(--bg-color)' }}
+              >
+                Trigger Confirmation
+              </button>
+            </div>
+
+            <div style={{ padding: '1rem', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
+              <h3 style={{ marginBottom: '0.5rem', fontWeight: 600 }}>Celebration Modal</h3>
+              <p style={{ fontSize: '0.85rem', opacity: 0.7, marginBottom: '1rem' }}>Fires a full-screen milestone reward modal.</p>
+              <button 
+                onClick={() => showCelebration({
+                  title: "Level Up!",
+                  subtitle: "Admin Testing Complete",
+                  details: "You successfully triggered the celebration modal. Great job executing.",
+                  primaryAction: { label: "Awesome" }
+                })} 
+                className="interactive" style={{ padding: '0.5rem 1rem', borderRadius: '4px', border: 'none', background: 'var(--accent-green)', color: '#000', fontWeight: 600 }}
+              >
+                Trigger Celebration
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

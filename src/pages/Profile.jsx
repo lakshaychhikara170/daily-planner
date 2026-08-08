@@ -3,10 +3,12 @@ import { motion } from 'framer-motion';
 import { useThemeEditor } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
 import { requestNotificationPermission, sendNotification } from '../utils/notifications';
+import { useUI } from '../context/UIContext';
 
 export default function Profile() {
   const { currentTheme, loadPreset } = useThemeEditor();
   const { user, isPro, logout, deferredPrompt } = useContext(AuthContext);
+  const { showConfirm, addToast } = useUI();
   const [notifsEnabled, setNotifsEnabled] = useState(
     typeof Notification !== 'undefined' && Notification.permission === 'granted'
   );
@@ -17,9 +19,10 @@ export default function Profile() {
       setNotifsEnabled(granted);
       if (granted) {
         sendNotification('Execute Pro', { body: 'Push notifications are now successfully enabled!' });
+        addToast('Notifications enabled.', 'success');
       }
     } else {
-      alert("Please disable notifications in your browser settings to turn them off.");
+      addToast('Please disable notifications in your browser settings to turn them off.', 'error');
     }
   };
 
@@ -112,7 +115,10 @@ export default function Profile() {
                   return (
                   <button
                     key={presetName}
-                    onClick={() => loadPreset(presetName)}
+                    onClick={() => {
+                      loadPreset(presetName);
+                      addToast(`Theme changed to ${presetName}`);
+                    }}
                     style={{
                       flex: 1,
                       padding: '1rem',
@@ -305,8 +311,17 @@ export default function Profile() {
               {user && (
                 <button
                   onClick={() => {
-                    logout();
-                    window.location.hash = '#/';
+                    showConfirm({
+                      title: "Log out?",
+                      message: "You will be logged out from this device.",
+                      confirmText: "Log out",
+                      isDestructive: true,
+                      onConfirm: () => {
+                        logout();
+                        window.location.hash = '#/';
+                        addToast("Logged out successfully.");
+                      }
+                    });
                   }}
                   className="interactive"
                   style={{
@@ -338,7 +353,7 @@ export default function Profile() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
               <label style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--dim-text)', marginBottom: '0' }}>Support The Developer</label>
               <a
-                href="https://www.buymeacoffee.com/"
+                href="https://buymeacoffee.com/lakshaychhikara"
                 target="_blank"
                 rel="noreferrer"
                 className="interactive"

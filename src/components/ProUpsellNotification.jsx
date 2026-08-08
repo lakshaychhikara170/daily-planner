@@ -249,7 +249,7 @@ export default function ProUpsellNotification() {
             I build software to help people become relentless. If this app helps you execute better, consider fueling the developer with some caffeine.
           </p>
           <a
-            href="https://www.buymeacoffee.com/"
+            href="https://buymeacoffee.com/lakshaychhikara"
             target="_blank"
             rel="noreferrer"
             className="interactive"

@@ -6,6 +6,7 @@ import MonthPicker from '../components/MonthPicker';
 import EditableWidget from '../components/EditableWidget';
 import EditableText from '../components/EditableText';
 import { AppContext } from '../context/AppContext';
+import { useUI } from '../context/UIContext';
 
 const getDateStr = (d) => {
   const yyyy = d.getFullYear();
@@ -21,16 +22,8 @@ const getColumnWidth = (i, activeIdx) => {
 };
 
 function Routines() {
-  const { addPoints, updateQuest } = useContext(AppContext);
-  const [routines, setRoutines] = useState(() => {
-    const savedRoutines = localStorage.getItem('dailyPlannerRoutines');
-    if (savedRoutines) return JSON.parse(savedRoutines);
-    return [
-      { id: 1, text: 'Morning Workout', history: {}, isLocked: false },
-      { id: 2, text: 'Read 20 pages', history: {}, isLocked: false },
-      { id: 3, text: 'Inbox Zero', history: {}, isLocked: false },
-    ];
-  });
+  const { routines, setRoutines, addPoints, updateQuest } = useContext(AppContext);
+  const { showConfirm, addToast } = useUI();
   
   const [appStartDate] = useState(() => {
     let startDate = localStorage.getItem('dailyPlannerStartDate');
@@ -144,6 +137,7 @@ function Routines() {
       if (r.id === routineId) {
         const newHistory = { ...r.history };
         const dateStr = monthDays[dayIndex].dateStr;
+        let isNowCompleted = false;
         
         if (!newHistory[dateStr]) {
           newHistory[dateStr] = 'partial';
@@ -153,6 +147,7 @@ function Routines() {
           }
         } else if (newHistory[dateStr] === 'partial') {
           newHistory[dateStr] = true;
+          isNowCompleted = true;
           if (dateStr === todayDateStr) {
              const basePoints = Math.max(10, 100 - (rIndex * 20));
              let streakMultiplier = 1;
@@ -172,6 +167,10 @@ function Routines() {
           if (dateStr === todayDateStr) {
              addPoints(-100); 
           }
+        }
+        
+        if (isNowCompleted) {
+          addToast("Routine checked off.", "success");
         }
 
         return { ...r, history: newHistory };
@@ -205,8 +204,17 @@ function Routines() {
     }
   };
 
-  const removeRoutine = (id) => {
-    setRoutines(routines.filter(r => r.id !== id));
+  const deleteRoutine = (id) => {
+    showConfirm({
+      title: "Delete this habit?",
+      message: "This will remove the habit from your tracker. All historical data will be archived.",
+      confirmText: "Delete Habit",
+      isDestructive: true,
+      onConfirm: () => {
+        setRoutines(routines.filter(r => r.id !== id));
+        addToast("Habit deleted.");
+      }
+    });
   };
 
   const toggleLock = (id) => {

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { saveMediaBlob, deleteMediaBlob, getMediaBlob } from '../utils/storage';
 import { AppContext } from '../context/AppContext';
+import { useUI } from '../context/UIContext';
 
 function Tasks() {
   const { 
@@ -10,6 +11,8 @@ function Tasks() {
     addPoints, updateQuest,
     setTrackedTask, setIsFocusMode, setFocusTimeLeft, setIsFocusTimerActive, setCountdown
   } = useContext(AppContext);
+  
+  const { showConfirm, addToast, showCelebration } = useUI();
   
   const [isAddingTask, setIsAddingTask] = useState(true); 
   const [newTaskText, setNewTaskText] = useState('');
@@ -93,6 +96,18 @@ function Tasks() {
           pointsDiff = 500;
           newCompletedAt = new Date().toISOString();
           if (updateQuest) updateQuest('tasks', 1);
+          addToast('Task completed.', 'success');
+          
+          // Check if this makes all tasks completed
+          const allTasksCompleted = prev.every(t => t.id === task.id || t.completed);
+          if (allTasksCompleted && prev.length > 0) {
+            showCelebration({
+              title: "Perfect day.",
+              subtitle: "All tasks completed",
+              details: "You've executed every action item on your list today. Keep the momentum going.",
+              primaryAction: { label: "Continue" }
+            });
+          }
         } else {
           pointsDiff = -500;
           newCompletedAt = null;
@@ -107,7 +122,16 @@ function Tasks() {
 
   const removeTask = (e, id) => {
     e.stopPropagation();
-    setTasks(tasks.filter(t => t.id !== id));
+    showConfirm({
+      title: "Delete this task?",
+      message: "This will remove the task permanently.",
+      confirmText: "Delete Task",
+      isDestructive: true,
+      onConfirm: () => {
+        setTasks(tasks.filter(t => t.id !== id));
+        addToast("Task deleted.");
+      }
+    });
   };
 
   const handleAddTask = (e) => {
