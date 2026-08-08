@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useThemeEditor } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
 import { AppContext } from '../context/AppContext';
+import { updateProfile } from 'firebase/auth';
 import { requestNotificationPermission, sendNotification } from '../utils/notifications';
 import { useUI } from '../context/UIContext';
 
@@ -11,9 +12,44 @@ export default function Profile() {
   const { user, isPro, logout, deferredPrompt } = useContext(AuthContext);
   const { points, levelInfo } = useContext(AppContext);
   const { showConfirm, addToast } = useUI();
+  const [refresh, setRefresh] = useState(0);
   const [notifsEnabled, setNotifsEnabled] = useState(
     typeof Notification !== 'undefined' && Notification.permission === 'granted'
   );
+
+  const handleEditAvatar = async () => {
+    if (!user) {
+      addToast("You must be logged in to edit your profile.", "error");
+      return;
+    }
+    const newUrl = window.prompt("Enter the URL for your new profile picture:", user.photoURL || "");
+    if (newUrl !== null) {
+      try {
+        await updateProfile(user, { photoURL: newUrl });
+        setRefresh(r => r + 1);
+        addToast("Profile picture updated!", "success");
+      } catch (e) {
+        addToast("Failed to update profile picture.", "error");
+      }
+    }
+  };
+
+  const handleEditName = async () => {
+    if (!user) {
+      addToast("You must be logged in to edit your profile.", "error");
+      return;
+    }
+    const newName = window.prompt("Enter your display name:", user.displayName || "");
+    if (newName !== null) {
+      try {
+        await updateProfile(user, { displayName: newName });
+        setRefresh(r => r + 1);
+        addToast("Display name updated!", "success");
+      } catch (e) {
+        addToast("Failed to update display name.", "error");
+      }
+    }
+  };
 
   const memberSince = user?.metadata?.creationTime ? new Date(user.metadata.creationTime) : new Date();
   const memberSinceMonth = memberSince.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toUpperCase();
@@ -70,18 +106,35 @@ export default function Profile() {
           <div style={{ display: 'flex', gap: '2.5rem', alignItems: 'flex-start' }}>
             {/* Avatar */}
             <div style={{ position: 'relative', flexShrink: 0 }}>
-              <div style={{ width: '100px', height: '100px', backgroundColor: 'var(--border-color)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg width="60" height="60" viewBox="0 0 24 24" fill="var(--text-color)">
-                  <path d="M12 2L22 7.77V16.23L12 22L2 16.23V7.77L12 2Z"/>
-                </svg>
+              <div style={{ width: '100px', height: '100px', backgroundColor: 'var(--border-color)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                {user?.photoURL ? (
+                  <img src={user.photoURL} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <svg width="60" height="60" viewBox="0 0 24 24" fill="var(--text-color)">
+                    <path d="M12 2L22 7.77V16.23L12 22L2 16.23V7.77L12 2Z"/>
+                  </svg>
+                )}
               </div>
-              <div style={{ position: 'absolute', bottom: '0', right: '0', width: '28px', height: '28px', backgroundColor: 'var(--accent-green)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '3px solid var(--bg-color)' }}>
+              <div 
+                className="interactive"
+                onClick={handleEditAvatar}
+                style={{ position: 'absolute', bottom: '0', right: '0', width: '28px', height: '28px', backgroundColor: 'var(--accent-green)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '3px solid var(--bg-color)', cursor: 'pointer' }}
+              >
                 <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="var(--bg-color)"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
               </div>
             </div>
             
             {/* Right side info */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', paddingTop: '0.75rem' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
+                  <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--dim-text)', fontWeight: 600 }}>Display Name</div>
+                  <button onClick={handleEditName} className="interactive" style={{ background: 'none', border: 'none', padding: 0, color: 'var(--dim-text)', cursor: 'pointer', display: 'flex' }}>
+                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                  </button>
+                </div>
+                <div style={{ fontSize: '1.15rem', fontWeight: 500, color: 'var(--text-color)' }}>{user?.displayName || 'Add a name...'}</div>
+              </div>
               <div>
                 <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--dim-text)', marginBottom: '0.35rem', fontWeight: 600 }}>Email Address</div>
                 <div style={{ fontSize: '1.15rem', fontWeight: 500, color: 'var(--text-color)' }}>{user ? user.email : 'Local Operator (Offline)'}</div>
