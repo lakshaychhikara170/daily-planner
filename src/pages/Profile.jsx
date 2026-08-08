@@ -171,7 +171,7 @@ export default function Profile() {
                 onClick={handleEditAvatarClick}
                 style={{ position: 'absolute', bottom: '0', right: '0', width: '28px', height: '28px', backgroundColor: 'var(--accent-green)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '3px solid var(--bg-color)', cursor: 'pointer', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.8))' }}
               >
-                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="var(--bg-color)"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="#000"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
               </div>
               <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*" onChange={handleFileChange} />
             </div>
@@ -209,7 +209,7 @@ export default function Profile() {
                         boxShadow: '0 1px 0 0 rgba(0,0,0,0.3)'
                       }} 
                     />
-                    <button onClick={handleSaveName} className="interactive" style={{ background: 'var(--accent-green)', border: 'none', padding: '0.25rem 0.5rem', color: 'var(--bg-color)', borderRadius: '4px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 'bold', boxShadow: '0 2px 4px rgba(0,0,0,0.5)', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>SAVE</button>
+                    <button onClick={handleSaveName} className="interactive" style={{ background: 'var(--accent-green)', border: 'none', padding: '0.25rem 0.5rem', color: '#000', borderRadius: '4px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 'bold', boxShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>SAVE</button>
                     <button onClick={() => setIsEditingName(false)} className="interactive" style={{ background: 'transparent', border: '1px solid var(--border-color)', padding: '0.25rem 0.5rem', color: 'var(--text-color)', borderRadius: '4px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 'bold' }}>CANCEL</button>
                   </div>
                 ) : (
