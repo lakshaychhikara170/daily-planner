@@ -271,28 +271,36 @@ function Admin() {
             width: '100%', padding: '1rem', background: 'var(--text-color)', 
             color: 'var(--bg-color)', border: 'none', borderRadius: '4px', fontWeight: 600
           }}>
-            Save Settings
-          </button>
-        </form>
-      )}
       {activeTab === 'notifications' && (
-        <div style={{ maxWidth: '600px' }}>
-          <h2 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', fontWeight: 600 }}>Test UI Notifications</h2>
+        <div style={{ maxWidth: '800px' }}>
+          <h2 style={{ fontSize: '1.25rem', marginBottom: '1.5rem', fontWeight: 600 }}>Test UI Notifications & Popups</h2>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div style={{ padding: '1rem', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+            
+            {/* Toast Notifications */}
+            <div style={{ padding: '1.5rem', border: '1px solid var(--border-color)', borderRadius: '8px', backgroundColor: 'var(--card-bg)' }}>
               <h3 style={{ marginBottom: '0.5rem', fontWeight: 600 }}>Toast Notification</h3>
-              <p style={{ fontSize: '0.85rem', opacity: 0.7, marginBottom: '1rem' }}>Fires a small notification in the bottom right corner.</p>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button onClick={() => addToast('System operating normally.', 'default')} className="interactive" style={{ padding: '0.5rem 1rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-color)' }}>Test Default</button>
-                <button onClick={() => addToast('Data synced successfully.', 'success')} className="interactive" style={{ padding: '0.5rem 1rem', borderRadius: '4px', border: '1px solid var(--accent-green)', background: 'transparent', color: 'var(--text-color)' }}>Test Success</button>
-                <button onClick={() => addToast('Connection lost.', 'error')} className="interactive" style={{ padding: '0.5rem 1rem', borderRadius: '4px', border: '1px solid var(--accent-red)', background: 'transparent', color: 'var(--text-color)' }}>Test Error</button>
+              <p style={{ fontSize: '0.85rem', opacity: 0.7, marginBottom: '1.5rem', height: '40px' }}>Non-blocking alerts in the bottom right corner.</p>
+              
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
+                <button onClick={() => addToast('System operating normally.', 'default')} className="interactive" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'transparent', color: 'var(--text-color)' }}>Default</button>
+                <button onClick={() => addToast('Data synced successfully.', 'success')} className="interactive" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', borderRadius: '4px', border: '1px solid var(--accent-green)', background: 'transparent', color: 'var(--text-color)' }}>Success</button>
+                <button onClick={() => addToast('Connection lost.', 'error')} className="interactive" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', borderRadius: '4px', border: '1px solid var(--accent-red)', background: 'transparent', color: 'var(--text-color)' }}>Error</button>
               </div>
+              
+              <button 
+                onClick={() => addToast('Toast properties configuration coming in v2.1', 'default')} 
+                className="interactive" style={{ width: '100%', padding: '0.5rem 1rem', borderRadius: '4px', border: '1px dashed var(--text-color)', background: 'transparent', color: 'var(--text-color)', fontSize: '0.85rem' }}
+              >
+                Edit Properties
+              </button>
             </div>
 
-            <div style={{ padding: '1rem', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
+            {/* Confirmation Modal */}
+            <div style={{ padding: '1.5rem', border: '1px solid var(--border-color)', borderRadius: '8px', backgroundColor: 'var(--card-bg)' }}>
               <h3 style={{ marginBottom: '0.5rem', fontWeight: 600 }}>Confirmation Modal</h3>
-              <p style={{ fontSize: '0.85rem', opacity: 0.7, marginBottom: '1rem' }}>Fires a blocking modal requiring user choice.</p>
+              <p style={{ fontSize: '0.85rem', opacity: 0.7, marginBottom: '1.5rem', height: '40px' }}>Blocking modal requiring user choice.</p>
+              
               <button 
                 onClick={() => showConfirm({
                   title: "Test Destructive Action",
@@ -301,15 +309,24 @@ function Admin() {
                   isDestructive: true,
                   onConfirm: () => addToast('Confirmed execution.', 'success')
                 })} 
-                className="interactive" style={{ padding: '0.5rem 1rem', borderRadius: '4px', border: 'none', background: 'var(--text-color)', color: 'var(--bg-color)' }}
+                className="interactive" style={{ width: '100%', padding: '0.5rem 1rem', marginBottom: '1rem', borderRadius: '4px', border: 'none', background: 'var(--text-color)', color: 'var(--bg-color)', fontWeight: 600 }}
               >
-                Trigger Confirmation
+                Test Confirmation
+              </button>
+              
+              <button 
+                onClick={() => addToast('Confirmation properties configuration coming in v2.1', 'default')} 
+                className="interactive" style={{ width: '100%', padding: '0.5rem 1rem', borderRadius: '4px', border: '1px dashed var(--text-color)', background: 'transparent', color: 'var(--text-color)', fontSize: '0.85rem' }}
+              >
+                Edit Properties
               </button>
             </div>
 
-            <div style={{ padding: '1rem', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
+            {/* Celebration Modal */}
+            <div style={{ padding: '1.5rem', border: '1px solid var(--border-color)', borderRadius: '8px', backgroundColor: 'var(--card-bg)' }}>
               <h3 style={{ marginBottom: '0.5rem', fontWeight: 600 }}>Celebration Modal</h3>
-              <p style={{ fontSize: '0.85rem', opacity: 0.7, marginBottom: '1rem' }}>Fires a full-screen milestone reward modal.</p>
+              <p style={{ fontSize: '0.85rem', opacity: 0.7, marginBottom: '1.5rem', height: '40px' }}>Full-screen milestone reward modal.</p>
+              
               <button 
                 onClick={() => showCelebration({
                   title: "Level Up!",
@@ -317,11 +334,67 @@ function Admin() {
                   details: "You successfully triggered the celebration modal. Great job executing.",
                   primaryAction: { label: "Awesome" }
                 })} 
-                className="interactive" style={{ padding: '0.5rem 1rem', borderRadius: '4px', border: 'none', background: 'var(--accent-green)', color: '#000', fontWeight: 600 }}
+                className="interactive" style={{ width: '100%', padding: '0.5rem 1rem', marginBottom: '1rem', borderRadius: '4px', border: 'none', background: 'var(--accent-green)', color: '#000', fontWeight: 600 }}
               >
-                Trigger Celebration
+                Test Celebration
+              </button>
+
+              <button 
+                onClick={() => addToast('Celebration properties configuration coming in v2.1', 'default')} 
+                className="interactive" style={{ width: '100%', padding: '0.5rem 1rem', borderRadius: '4px', border: '1px dashed var(--text-color)', background: 'transparent', color: 'var(--text-color)', fontSize: '0.85rem' }}
+              >
+                Edit Properties
               </button>
             </div>
+            
+            {/* Buy Me a Coffee Modal */}
+            <div style={{ padding: '1.5rem', border: '1px solid var(--border-color)', borderRadius: '8px', backgroundColor: 'var(--card-bg)' }}>
+              <h3 style={{ marginBottom: '0.5rem', fontWeight: 600 }}>Developer Coffee Modal</h3>
+              <p style={{ fontSize: '0.85rem', opacity: 0.7, marginBottom: '1.5rem', height: '40px' }}>Bottom-right floating toast for donations.</p>
+              
+              <button 
+                onClick={() => window.dispatchEvent(new CustomEvent('test_coffee_toast'))} 
+                className="interactive" style={{ width: '100%', padding: '0.5rem 1rem', marginBottom: '1rem', borderRadius: '4px', border: 'none', background: 'var(--text-color)', color: 'var(--bg-color)', fontWeight: 600 }}
+              >
+                Test Coffee Modal
+              </button>
+
+              <button 
+                onClick={() => addToast('Coffee modal properties coming in v2.1', 'default')} 
+                className="interactive" style={{ width: '100%', padding: '0.5rem 1rem', borderRadius: '4px', border: '1px dashed var(--text-color)', background: 'transparent', color: 'var(--text-color)', fontSize: '0.85rem' }}
+              >
+                Edit Properties
+              </button>
+            </div>
+
+            {/* Purchase Upsell Modal */}
+            <div style={{ padding: '1.5rem', border: '1px solid var(--border-color)', borderRadius: '8px', backgroundColor: 'var(--card-bg)' }}>
+              <h3 style={{ marginBottom: '0.5rem', fontWeight: 600 }}>Pro Purchase Upsell</h3>
+              <p style={{ fontSize: '0.85rem', opacity: 0.7, marginBottom: '1.5rem', height: '40px' }}>The full-screen / toast paywall alerts.</p>
+              
+              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+                <button 
+                  onClick={() => window.dispatchEvent(new CustomEvent('test_upsell_toast'))} 
+                  className="interactive" style={{ flex: 1, padding: '0.5rem 1rem', borderRadius: '4px', border: 'none', background: 'var(--text-color)', color: 'var(--bg-color)', fontSize: '0.85rem', fontWeight: 600 }}
+                >
+                  Test Toast
+                </button>
+                <button 
+                  onClick={() => window.dispatchEvent(new CustomEvent('test_upsell_fullscreen'))} 
+                  className="interactive" style={{ flex: 1, padding: '0.5rem 1rem', borderRadius: '4px', border: 'none', background: 'var(--accent-red)', color: '#fff', fontSize: '0.85rem', fontWeight: 600 }}
+                >
+                  Test Full
+                </button>
+              </div>
+
+              <button 
+                onClick={() => addToast('Upsell properties configuration coming in v2.1', 'default')} 
+                className="interactive" style={{ width: '100%', padding: '0.5rem 1rem', borderRadius: '4px', border: '1px dashed var(--text-color)', background: 'transparent', color: 'var(--text-color)', fontSize: '0.85rem' }}
+              >
+                Edit Properties
+              </button>
+            </div>
+
           </div>
         </div>
       )}

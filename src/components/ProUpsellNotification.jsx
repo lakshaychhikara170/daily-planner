@@ -9,6 +9,14 @@ export default function ProUpsellNotification() {
   const showCountRef = useRef(0);
 
   useEffect(() => {
+    const handleTestCoffee = () => setViewState('coffee_toast');
+    const handleTestUpsellToast = () => setViewState('toast');
+    const handleTestUpsellFullscreen = () => setViewState('fullscreen');
+    
+    window.addEventListener('test_coffee_toast', handleTestCoffee);
+    window.addEventListener('test_upsell_toast', handleTestUpsellToast);
+    window.addEventListener('test_upsell_fullscreen', handleTestUpsellFullscreen);
+
     if (isPro) return;
 
     const lastSeenStr = localStorage.getItem('execute_pro_fullscreen_last_seen');
@@ -35,7 +43,12 @@ export default function ProUpsellNotification() {
       // fallback
     }
 
-    return () => clearTimeout(timerRef.current);
+    return () => {
+      clearTimeout(timerRef.current);
+      window.removeEventListener('test_coffee_toast', handleTestCoffee);
+      window.removeEventListener('test_upsell_toast', handleTestUpsellToast);
+      window.removeEventListener('test_upsell_fullscreen', handleTestUpsellFullscreen);
+    };
   }, [isPro]);
 
   const scheduleNextToast = (delay) => {
