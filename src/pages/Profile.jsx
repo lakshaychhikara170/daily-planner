@@ -1,9 +1,11 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useThemeEditor } from '../context/ThemeContext';
 import { AuthContext } from '../context/AuthContext';
 import { AppContext } from '../context/AppContext';
 import { updateProfile } from 'firebase/auth';
+import { storage } from '../utils/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { requestNotificationPermission, sendNotification } from '../utils/notifications';
 import { useUI } from '../context/UIContext';
 
@@ -13,24 +15,41 @@ export default function Profile() {
   const { points, levelInfo } = useContext(AppContext);
   const { showConfirm, addToast } = useUI();
   const [refresh, setRefresh] = useState(0);
+  const fileInputRef = useRef(null);
   const [notifsEnabled, setNotifsEnabled] = useState(
     typeof Notification !== 'undefined' && Notification.permission === 'granted'
   );
 
-  const handleEditAvatar = async () => {
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
     if (!user) {
       addToast("You must be logged in to edit your profile.", "error");
       return;
     }
-    const newUrl = window.prompt("Enter the URL for your new profile picture:", user.photoURL || "");
-    if (newUrl !== null) {
-      try {
-        await updateProfile(user, { photoURL: newUrl });
-        setRefresh(r => r + 1);
-        addToast("Profile picture updated!", "success");
-      } catch (e) {
-        addToast("Failed to update profile picture.", "error");
+    try {
+      addToast("Uploading image...", "default");
+      const storageRef = ref(storage, `avatars/${user.uid}_${Date.now()}`);
+      await uploadBytes(storageRef, file);
+      const newUrl = await getDownloadURL(storageRef);
+      await updateProfile(user, { photoURL: newUrl });
+      setRefresh(r => r + 1);
+      addToast("Profile picture updated!", "success");
+    } catch (err) {
+      console.error(err);
+      addToast("Storage upload failed. Falling back to URL input.", "error");
+      const fallbackUrl = window.prompt("Upload failed. Enter an image URL manually:", user.photoURL || "");
+      if (fallbackUrl) {
+         await updateProfile(user, { photoURL: fallbackUrl });
+         setRefresh(r => r + 1);
+         addToast("Profile picture updated via URL!", "success");
       }
+    }
+  };
+
+  const handleEditAvatarClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
     }
   };
 
@@ -117,11 +136,12 @@ export default function Profile() {
               </div>
               <div 
                 className="interactive"
-                onClick={handleEditAvatar}
-                style={{ position: 'absolute', bottom: '0', right: '0', width: '28px', height: '28px', backgroundColor: 'var(--accent-green)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '3px solid var(--bg-color)', cursor: 'pointer' }}
+                onClick={handleEditAvatarClick}
+                style={{ position: 'absolute', bottom: '0', right: '0', width: '28px', height: '28px', backgroundColor: 'var(--accent-green)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '3px solid var(--bg-color)', cursor: 'pointer', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.8))' }}
               >
                 <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="var(--bg-color)"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
               </div>
+              <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*" onChange={handleFileChange} />
             </div>
             
             {/* Right side info */}
@@ -129,7 +149,7 @@ export default function Profile() {
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
                   <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--dim-text)', fontWeight: 600 }}>Display Name</div>
-                  <button onClick={handleEditName} className="interactive" style={{ background: 'none', border: 'none', padding: 0, color: 'var(--dim-text)', cursor: 'pointer', display: 'flex' }}>
+                  <button onClick={handleEditName} className="interactive" style={{ background: 'none', border: 'none', padding: 0, color: 'var(--accent-green)', cursor: 'pointer', display: 'flex', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.8))' }}>
                     <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                   </button>
                 </div>
@@ -142,7 +162,7 @@ export default function Profile() {
               <div>
                 <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--dim-text)', marginBottom: '0.5rem', fontWeight: 600 }}>License Status</div>
                 <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', border: `1px solid ${isPro ? 'var(--accent-green)' : 'var(--border-color)'}`, borderRadius: '20px', padding: '0.35rem 0.85rem', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isPro ? 'var(--accent-green)' : 'var(--dim-text)' }}></div>
+                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isPro ? 'var(--accent-green)' : 'var(--dim-text)', boxShadow: isPro ? '0 1px 4px rgba(0,0,0,0.8)' : 'none' }}></div>
                   {isPro ? 'LIFETIME PRO ACTIVATED' : 'FREE / LOCAL ONLY'}
                 </div>
               </div>
@@ -161,7 +181,7 @@ export default function Profile() {
                 </div>
               </div>
               <div style={{ height: '3px', width: '100%', backgroundColor: 'var(--border-color)', marginBottom: '0.75rem' }}>
-                <div style={{ width: `${levelInfo.progress}%`, height: '100%', backgroundColor: 'var(--accent-green)' }}></div>
+                <div style={{ width: `${levelInfo.progress}%`, height: '100%', backgroundColor: 'var(--accent-green)', boxShadow: '0 2px 4px rgba(0,0,0,0.8)' }}></div>
               </div>
               <div style={{ fontSize: '0.75rem', color: 'var(--dim-text)' }}>{points.toLocaleString()} XP Total</div>
             </div>
@@ -197,7 +217,7 @@ export default function Profile() {
           {/* Consistency Box */}
           <div style={{ backgroundColor: 'rgba(196, 243, 70, 0.08)', border: '1px solid rgba(196, 243, 70, 0.2)', borderRadius: '8px', padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
             <div style={{ flexShrink: 0 }}>
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="var(--accent-green)" stroke="var(--text-color)" strokeWidth="1.5">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="var(--accent-green)" stroke="var(--text-color)" strokeWidth="1.5" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.8))' }}>
                 <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
               </svg>
             </div>
@@ -212,9 +232,9 @@ export default function Profile() {
                 <div style={{ fontSize: '0.65rem', color: 'var(--dim-text)', marginTop: '0.25rem' }}>Keep building.</div>
               </div>
               <div style={{ width: '40px', height: '40px', backgroundColor: 'var(--bg-color)', borderRadius: '6px', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: '4px', padding: '8px', border: '1px solid var(--border-color)' }}>
-                <div style={{ width: '6px', height: '40%', backgroundColor: 'var(--accent-green)', borderRadius: '2px' }}></div>
-                <div style={{ width: '6px', height: '70%', backgroundColor: 'var(--accent-green)', borderRadius: '2px' }}></div>
-                <div style={{ width: '6px', height: '100%', backgroundColor: 'var(--accent-green)', borderRadius: '2px' }}></div>
+                <div style={{ width: '6px', height: '40%', backgroundColor: 'var(--accent-green)', borderRadius: '2px', boxShadow: '0 1px 3px rgba(0,0,0,0.8)' }}></div>
+                <div style={{ width: '6px', height: '70%', backgroundColor: 'var(--accent-green)', borderRadius: '2px', boxShadow: '0 1px 3px rgba(0,0,0,0.8)' }}></div>
+                <div style={{ width: '6px', height: '100%', backgroundColor: 'var(--accent-green)', borderRadius: '2px', boxShadow: '0 1px 3px rgba(0,0,0,0.8)' }}></div>
               </div>
             </div>
           </div>

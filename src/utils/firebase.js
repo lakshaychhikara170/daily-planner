@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -17,12 +18,14 @@ const firebaseConfig = {
 let app = null;
 let auth = null;
 let db = null;
+let storage = null;
 
 try {
   if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "your-api-key-here") {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
     db = getFirestore(app);
+    storage = getStorage(app);
   } else {
     console.warn("Firebase API Key is missing. Cloud syncing and authentication are disabled.");
   }
@@ -30,4 +33,4 @@ try {
   console.error("Firebase initialization error:", error);
 }
 
-export { app, auth, db };
+export { app, auth, db, storage };
