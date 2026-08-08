@@ -6,12 +6,55 @@ export default function Toast({ toast, onClose }) {
   const [isHiding, setIsHiding] = useState(false);
   
   useEffect(() => {
+    // Play sound on mount
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (AudioContext) {
+        const ctx = new AudioContext();
+        const osc = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+        
+        osc.connect(gainNode);
+        gainNode.connect(ctx.destination);
+        
+        if (toast.type === 'success') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(440, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.1);
+          gainNode.gain.setValueAtTime(0, ctx.currentTime);
+          gainNode.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.05);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 0.3);
+        } else if (toast.type === 'error') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(300, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.2);
+          gainNode.gain.setValueAtTime(0, ctx.currentTime);
+          gainNode.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.05);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 0.3);
+        } else {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(600, ctx.currentTime);
+          gainNode.gain.setValueAtTime(0, ctx.currentTime);
+          gainNode.gain.linearRampToValueAtTime(0.05, ctx.currentTime + 0.02);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 0.2);
+        }
+      }
+    } catch (e) {
+      // Audio autoplay might be blocked, ignore
+    }
+
     const hideTimer = setTimeout(() => {
       setIsHiding(true);
     }, 2700);
 
     return () => clearTimeout(hideTimer);
-  }, []);
+  }, [toast.type]);
 
   const getStyle = () => {
     switch (toast.type) {
@@ -24,21 +67,17 @@ export default function Toast({ toast, onClose }) {
   const styleObj = getStyle();
 
   if (notificationStyle === 'minimal') {
-    // Picture aesthetic (Light/Cream bg, thick left border, circular icon)
-    let leftBorderColor = 'var(--text-color)';
+    // Picture aesthetic (Light/Cream bg, no thick left border, circular icon, light shadow)
     let iconBg = 'rgba(0,0,0,0.05)';
     let iconColor = 'var(--text-color)';
     
     if (toast.type === 'success') {
-      leftBorderColor = 'var(--accent-green)';
-      iconBg = 'rgba(196, 243, 70, 0.2)'; // Assuming accent-green is a lime green
-      iconColor = 'var(--text-color)'; // or green? Let's stick to text color for contrast if it's light theme, or dark if light theme. Actually, just use text color.
+      iconBg = 'rgba(196, 243, 70, 0.2)'; // Light green
+      iconColor = 'var(--text-color)';
     } else if (toast.type === 'error') {
-      leftBorderColor = 'var(--accent-red)';
-      iconBg = 'rgba(239, 68, 68, 0.1)';
-      iconColor = 'var(--accent-red)';
+      iconBg = '#fde8e8'; // Light red
+      iconColor = 'var(--text-color)'; // Black icon
     } else {
-      leftBorderColor = '#3b82f6';
       iconBg = 'rgba(59, 130, 246, 0.1)';
       iconColor = '#3b82f6';
     }
@@ -47,11 +86,8 @@ export default function Toast({ toast, onClose }) {
       <div style={{
         backgroundColor: 'var(--card-bg)',
         color: 'var(--text-color)',
-        borderLeft: `4px solid ${leftBorderColor}`,
-        borderTop: '1px solid var(--border-color)',
-        borderRight: '1px solid var(--border-color)',
-        borderBottom: '1px solid var(--border-color)',
-        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+        border: '1px solid rgba(0,0,0,0.05)',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0,0,0,0.02)',
         display: 'flex',
         flexDirection: 'column',
         pointerEvents: 'auto',
