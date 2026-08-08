@@ -162,7 +162,7 @@ export default function Profile() {
                   )}
                 </div>
                 {isEditingName ? (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))' }}>
                     <input 
                       type="text" 
                       value={editNameValue} 
@@ -179,10 +179,11 @@ export default function Profile() {
                         outline: 'none',
                         padding: '0 0 2px 0',
                         width: '100%',
-                        fontFamily: 'inherit'
+                        fontFamily: 'inherit',
+                        boxShadow: '0 1px 0 0 rgba(0,0,0,0.3)'
                       }} 
                     />
-                    <button onClick={handleSaveName} className="interactive" style={{ background: 'var(--accent-green)', border: 'none', padding: '0.25rem 0.5rem', color: 'var(--bg-color)', borderRadius: '4px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 'bold' }}>SAVE</button>
+                    <button onClick={handleSaveName} className="interactive" style={{ background: 'var(--accent-green)', border: 'none', padding: '0.25rem 0.5rem', color: 'var(--bg-color)', borderRadius: '4px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 'bold', boxShadow: '0 2px 4px rgba(0,0,0,0.5)', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>SAVE</button>
                     <button onClick={() => setIsEditingName(false)} className="interactive" style={{ background: 'transparent', border: '1px solid var(--border-color)', padding: '0.25rem 0.5rem', color: 'var(--text-color)', borderRadius: '4px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 'bold' }}>CANCEL</button>
                   </div>
                 ) : (
@@ -195,7 +196,7 @@ export default function Profile() {
               </div>
               <div>
                 <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--dim-text)', marginBottom: '0.5rem', fontWeight: 600 }}>License Status</div>
-                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', border: `1px solid ${isPro ? 'var(--accent-green)' : 'var(--border-color)'}`, borderRadius: '20px', padding: '0.35rem 0.85rem', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', border: `1px solid ${isPro ? 'var(--accent-green)' : 'var(--border-color)'}`, borderRadius: '20px', padding: '0.35rem 0.85rem', fontSize: '0.75rem', fontWeight: 'bold', filter: isPro ? 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' : 'none', backgroundColor: 'var(--bg-color)' }}>
                   <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isPro ? 'var(--accent-green)' : 'var(--dim-text)', boxShadow: isPro ? '0 1px 4px rgba(0,0,0,0.8)' : 'none' }}></div>
                   {isPro ? 'LIFETIME PRO ACTIVATED' : 'FREE / LOCAL ONLY'}
                 </div>
