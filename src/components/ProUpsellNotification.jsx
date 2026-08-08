@@ -364,7 +364,7 @@ export default function ProUpsellNotification() {
         position: 'fixed',
         bottom: '2rem',
         right: '2rem',
-        width: '380px',
+        width: '420px',
         backgroundColor: 'var(--card-bg)',
         border: '2px solid var(--text-color)',
         boxShadow: '8px 8px 0px var(--text-color)',
@@ -378,15 +378,9 @@ export default function ProUpsellNotification() {
             from { transform: translateY(100px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
           }
-          @keyframes pulseBorder {
-            0% { border-color: var(--text-color); }
-            50% { border-color: var(--accent-green); }
-            100% { border-color: var(--text-color); }
-          }
           .upsell-toast-btn:hover {
-            background-color: var(--accent-green) !important;
-            color: var(--bg-color) !important;
-            transform: translateY(-2px);
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
           }
         `}</style>
         
@@ -394,16 +388,16 @@ export default function ProUpsellNotification() {
         <div style={{ 
           backgroundColor: 'var(--text-color)', 
           color: 'var(--bg-color)',
-          padding: '0.75rem 1rem',
+          padding: '1rem',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          textTransform: 'uppercase',
-          fontWeight: 'bold',
-          letterSpacing: '0.1em',
-          fontSize: '0.85rem'
+          borderBottom: '2px solid var(--text-color)'
         }}>
-          <span>System Alert // Cloud Disabled</span>
+          <div style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, letterSpacing: '0.1em', fontSize: '0.75rem', textTransform: 'uppercase' }}>
+            <span style={{ color: 'var(--bg-color)' }}>SYSTEM ALERT</span>
+            <span style={{ color: 'var(--accent-green)', marginLeft: '0.5rem' }}>// CLOUD DISABLED</span>
+          </div>
           <button 
             onClick={handleDismissToast}
             className="interactive"
@@ -411,38 +405,40 @@ export default function ProUpsellNotification() {
               background: 'none', 
               border: 'none', 
               color: 'var(--bg-color)', 
-              
               fontSize: '1.2rem',
-              lineHeight: 1
+              lineHeight: 1,
+              padding: 0
             }}
           >×</button>
         </div>
 
         {/* Body */}
-        <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', backgroundColor: '#f6f6f1', color: '#111' }}>
           
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
             {/* Graphic Icon */}
-            <div style={{ 
-              width: '50px', 
-              height: '50px', 
-              backgroundColor: 'var(--bg-color)',
-              border: '2px solid var(--text-color)',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexShrink: 0,
-              animation: 'pulseBorder 2s infinite'
-            }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--text-color)" strokeWidth="2" strokeLinecap="square" strokeLinejoin="miter">
-                <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+            <div style={{ position: 'relative', width: '60px', height: '60px', flexShrink: 0 }}>
+              <div style={{ 
+                position: 'absolute', inset: 0, 
+                backgroundColor: '#efefe9', 
+                borderRadius: '50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}>
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#111" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22.61 16.95A5 5 0 0 0 18 10h-1.26a8 8 0 0 0-7.05-6M5 5a8 8 0 0 0 4 15h9a5 5 0 0 0 1.7-.3"></path>
+                  <line x1="1" y1="1" x2="23" y2="23"></line>
+                </svg>
+              </div>
+              {/* Green orbital accent */}
+              <svg style={{ position: 'absolute', inset: '-5px', width: '70px', height: '70px' }} viewBox="0 0 70 70">
+                <path d="M 35 5 A 30 30 0 0 1 62 47" fill="none" stroke="var(--accent-green)" strokeWidth="2" strokeLinecap="round" />
+                <circle cx="62" cy="47" r="3" fill="none" stroke="var(--accent-green)" strokeWidth="2" />
               </svg>
             </div>
             
             <div>
-              <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1rem', textTransform: 'uppercase', fontWeight: 'bold' }}>Protect Your Data</h3>
-              <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--dim-text)', lineHeight: '1.4' }}>
+              <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.25rem', fontFamily: 'var(--font-serif)', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.05em', color: '#111' }}>Protect Your Data</h3>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: '#666', fontFamily: 'var(--font-sans)', lineHeight: '1.4' }}>
                 Your tasks are trapped locally.
               </p>
             </div>
@@ -455,17 +451,18 @@ export default function ProUpsellNotification() {
               window.location.hash = '#/upgrade';
             }}
             style={{
-              marginTop: '0.5rem',
-              backgroundColor: 'var(--text-color)',
-              color: 'var(--bg-color)',
-              border: '2px solid var(--text-color)',
-              padding: '0.75rem',
+              backgroundColor: '#111',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '4px',
+              padding: '1rem',
               textTransform: 'uppercase',
               fontWeight: 'bold',
               fontSize: '0.85rem',
-              letterSpacing: '0.1em',
-              
+              letterSpacing: '0.15em',
               transition: 'all 0.2s ease',
+              cursor: 'pointer',
+              width: '100%'
             }}
           >
             Activate Cloud Sync - {isIndia ? '₹499' : '$9.99'}

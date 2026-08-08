@@ -60,7 +60,7 @@ export default function Toast({ toast, onClose }) {
         maxWidth: '400px',
         overflow: 'hidden',
         marginBottom: '0.5rem',
-        borderRadius: '0 4px 4px 0'
+        borderRadius: '8px'
       }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', padding: '1rem' }}>
           
