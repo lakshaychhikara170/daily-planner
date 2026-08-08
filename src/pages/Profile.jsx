@@ -29,24 +29,50 @@ export default function Profile() {
       addToast("You must be logged in to edit your profile.", "error");
       return;
     }
-    try {
-      addToast("Uploading image...", "default");
-      const storageRef = ref(storage, `avatars/${user.uid}_${Date.now()}`);
-      await uploadBytes(storageRef, file);
-      const newUrl = await getDownloadURL(storageRef);
-      await updateProfile(user, { photoURL: newUrl });
-      setRefresh(r => r + 1);
-      addToast("Profile picture updated!", "success");
-    } catch (err) {
-      console.error(err);
-      addToast("Storage upload failed. Falling back to URL input.", "error");
-      const fallbackUrl = window.prompt("Upload failed. Enter an image URL manually:", user.photoURL || "");
-      if (fallbackUrl) {
-         await updateProfile(user, { photoURL: fallbackUrl });
-         setRefresh(r => r + 1);
-         addToast("Profile picture updated via URL!", "success");
-      }
-    }
+    
+    addToast("Updating avatar...", "default");
+    
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const img = new Image();
+      img.onload = async () => {
+        const canvas = document.createElement('canvas');
+        const MAX_SIZE = 256;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_SIZE) {
+            height *= MAX_SIZE / width;
+            width = MAX_SIZE;
+          }
+        } else {
+          if (height > MAX_SIZE) {
+            width *= MAX_SIZE / height;
+            height = MAX_SIZE;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        
+        try {
+          localStorage.setItem('local_avatar', dataUrl);
+          await updateProfile(user, { photoURL: 'local_avatar' });
+          setRefresh(r => r + 1);
+          addToast("Profile picture updated!", "success");
+        } catch (err) {
+          console.error(err);
+          addToast("Failed to update profile picture.", "error");
+        }
+      };
+      img.src = evt.target.result;
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleEditAvatarClick = () => {
@@ -132,8 +158,8 @@ export default function Profile() {
             {/* Avatar */}
             <div style={{ position: 'relative', flexShrink: 0 }}>
               <div style={{ width: '100px', height: '100px', backgroundColor: 'var(--border-color)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                {user?.photoURL ? (
-                  <img src={user.photoURL} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                {user?.photoURL && (user.photoURL !== 'local_avatar' || localStorage.getItem('local_avatar')) ? (
+                  <img src={user.photoURL === 'local_avatar' ? localStorage.getItem('local_avatar') : user.photoURL} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
                   <svg width="60" height="60" viewBox="0 0 24 24" fill="var(--text-color)">
                     <path d="M12 2L22 7.77V16.23L12 22L2 16.23V7.77L12 2Z"/>
