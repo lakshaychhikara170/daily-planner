@@ -16,6 +16,8 @@ export default function Profile() {
   const { showConfirm, addToast } = useUI();
   const [refresh, setRefresh] = useState(0);
   const fileInputRef = useRef(null);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editNameValue, setEditNameValue] = useState('');
   const [notifsEnabled, setNotifsEnabled] = useState(
     typeof Notification !== 'undefined' && Notification.permission === 'granted'
   );
@@ -53,20 +55,24 @@ export default function Profile() {
     }
   };
 
-  const handleEditName = async () => {
+  const handleEditNameClick = () => {
     if (!user) {
       addToast("You must be logged in to edit your profile.", "error");
       return;
     }
-    const newName = window.prompt("Enter your display name:", user.displayName || "");
-    if (newName !== null) {
-      try {
-        await updateProfile(user, { displayName: newName });
-        setRefresh(r => r + 1);
-        addToast("Display name updated!", "success");
-      } catch (e) {
-        addToast("Failed to update display name.", "error");
-      }
+    setEditNameValue(user.displayName || "");
+    setIsEditingName(true);
+  };
+
+  const handleSaveName = async () => {
+    if (!user) return;
+    try {
+      await updateProfile(user, { displayName: editNameValue });
+      setRefresh(r => r + 1);
+      setIsEditingName(false);
+      addToast("Display name updated!", "success");
+    } catch (e) {
+      addToast("Failed to update display name.", "error");
     }
   };
 
@@ -149,11 +155,39 @@ export default function Profile() {
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
                   <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--dim-text)', fontWeight: 600 }}>Display Name</div>
-                  <button onClick={handleEditName} className="interactive" style={{ background: 'none', border: 'none', padding: 0, color: 'var(--accent-green)', cursor: 'pointer', display: 'flex', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.8))' }}>
-                    <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                  </button>
+                  {!isEditingName && (
+                    <button onClick={handleEditNameClick} className="interactive" style={{ background: 'none', border: 'none', padding: 0, color: 'var(--accent-green)', cursor: 'pointer', display: 'flex', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.8))' }}>
+                      <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                    </button>
+                  )}
                 </div>
-                <div style={{ fontSize: '1.15rem', fontWeight: 500, color: 'var(--text-color)' }}>{user?.displayName || 'Add a name...'}</div>
+                {isEditingName ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <input 
+                      type="text" 
+                      value={editNameValue} 
+                      onChange={(e) => setEditNameValue(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSaveName()}
+                      autoFocus
+                      style={{ 
+                        fontSize: '1.15rem', 
+                        fontWeight: 500, 
+                        color: 'var(--text-color)', 
+                        background: 'transparent',
+                        border: 'none',
+                        borderBottom: '1px solid var(--accent-green)',
+                        outline: 'none',
+                        padding: '0 0 2px 0',
+                        width: '100%',
+                        fontFamily: 'inherit'
+                      }} 
+                    />
+                    <button onClick={handleSaveName} className="interactive" style={{ background: 'var(--accent-green)', border: 'none', padding: '0.25rem 0.5rem', color: 'var(--bg-color)', borderRadius: '4px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 'bold' }}>SAVE</button>
+                    <button onClick={() => setIsEditingName(false)} className="interactive" style={{ background: 'transparent', border: '1px solid var(--border-color)', padding: '0.25rem 0.5rem', color: 'var(--text-color)', borderRadius: '4px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 'bold' }}>CANCEL</button>
+                  </div>
+                ) : (
+                  <div style={{ fontSize: '1.15rem', fontWeight: 500, color: 'var(--text-color)' }}>{user?.displayName || 'Add a name...'}</div>
+                )}
               </div>
               <div>
                 <div style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--dim-text)', marginBottom: '0.35rem', fontWeight: 600 }}>Email Address</div>
