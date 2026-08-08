@@ -24,39 +24,83 @@ export default function Toast({ toast, onClose }) {
   const styleObj = getStyle();
 
   if (notificationStyle === 'minimal') {
-    // Brutalist / Minimal aesthetic
+    // Picture aesthetic (Light/Cream bg, thick left border, circular icon)
+    let leftBorderColor = 'var(--text-color)';
+    let iconBg = 'rgba(0,0,0,0.05)';
+    let iconColor = 'var(--text-color)';
+    
+    if (toast.type === 'success') {
+      leftBorderColor = 'var(--accent-green)';
+      iconBg = 'rgba(196, 243, 70, 0.2)'; // Assuming accent-green is a lime green
+      iconColor = 'var(--text-color)'; // or green? Let's stick to text color for contrast if it's light theme, or dark if light theme. Actually, just use text color.
+    } else if (toast.type === 'error') {
+      leftBorderColor = 'var(--accent-red)';
+      iconBg = 'rgba(239, 68, 68, 0.1)';
+      iconColor = 'var(--accent-red)';
+    } else {
+      leftBorderColor = '#3b82f6';
+      iconBg = 'rgba(59, 130, 246, 0.1)';
+      iconColor = '#3b82f6';
+    }
+
     return (
       <div style={{
         backgroundColor: 'var(--card-bg)',
         color: 'var(--text-color)',
-        border: '1px solid var(--text-color)',
-        boxShadow: '4px 4px 0px var(--text-color)',
+        borderLeft: `4px solid ${leftBorderColor}`,
+        borderTop: '1px solid var(--border-color)',
+        borderRight: '1px solid var(--border-color)',
+        borderBottom: '1px solid var(--border-color)',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
         display: 'flex',
         flexDirection: 'column',
         pointerEvents: 'auto',
         animation: isHiding ? 'slideOutRight 0.3s forwards' : 'slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-        minWidth: '320px',
-        overflow: 'hidden'
+        minWidth: '340px',
+        maxWidth: '400px',
+        overflow: 'hidden',
+        marginBottom: '0.5rem',
+        borderRadius: '0 4px 4px 0'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.25rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div style={{ color: toast.type === 'error' ? 'var(--accent-red)' : toast.type === 'success' ? 'var(--accent-green)' : 'var(--text-color)', display: 'flex', alignItems: 'center' }}>
-              {styleObj.icon}
-            </div>
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{toast.message}</span>
+        <div style={{ display: 'flex', alignItems: 'flex-start', padding: '1rem' }}>
+          
+          {/* Circular Icon */}
+          <div style={{ 
+            width: '40px', height: '40px', borderRadius: '50%', 
+            backgroundColor: iconBg, color: iconColor, 
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0, marginRight: '1rem'
+          }}>
+            {styleObj.icon}
           </div>
-          <button 
-            onClick={() => { setIsHiding(true); setTimeout(onClose, 300); }} 
-            className="interactive"
-            style={{ 
-              background: 'none', border: 'none', color: 'var(--dim-text)',
-              cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center'
-            }}
-          >
-            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+          
+          {/* Content */}
+          <div style={{ flex: 1, paddingTop: '0.2rem' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.5, marginBottom: '0.25rem' }}>
+              {toast.type === 'success' ? 'SUCCESS' : toast.type === 'error' ? 'ERROR' : 'NOTIFICATION'}
+            </div>
+            <div style={{ fontFamily: 'var(--font-serif)', fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-color)' }}>
+              {toast.message}
+            </div>
+            {/* If we had a subtitle, it would go here. For now, it's just the message. */}
+          </div>
+          
+          {/* Right Side: Close Button */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.5rem' }}>
+            <button 
+              onClick={() => { setIsHiding(true); setTimeout(onClose, 300); }} 
+              className="interactive"
+              style={{ 
+                background: 'none', border: 'none', color: 'var(--dim-text)',
+                cursor: 'pointer', padding: '0', display: 'flex', alignItems: 'center'
+              }}
+            >
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <span style={{ fontSize: '0.7rem', color: 'var(--dim-text)', fontFamily: 'var(--font-sans)' }}>now</span>
+          </div>
         </div>
       </div>
     );
