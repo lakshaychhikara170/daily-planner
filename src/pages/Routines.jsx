@@ -22,7 +22,12 @@ const getColumnWidth = (i, activeIdx) => {
 };
 
 function Routines() {
-  const { routines, setRoutines, addPoints, updateQuest } = useContext(AppContext);
+  const [routines, setRoutines] = useState(() => {
+    const saved = localStorage.getItem('dailyPlannerRoutines');
+    return saved ? JSON.parse(saved) : [];
+  });
+  
+  const { addPoints, updateQuest } = useContext(AppContext);
   const { showConfirm, addToast } = useUI();
   
   const [appStartDate] = useState(() => {
@@ -960,7 +965,7 @@ function Routines() {
                         <button className="delete-btn interactive" onClick={() => toggleArchive(routine.id)} style={{ color: 'var(--text-color)', opacity: 0.4 }} title={routine.isArchived ? "Unarchive" : "Archive"}>
                           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="12" y1="17" x2="12" y2="10"></line><polyline points="9 13 12 10 15 13"></polyline></svg>
                         </button>
-                        <button className="delete-btn interactive" onClick={() => removeRoutine(routine.id)} style={{ color: 'var(--accent-orange)', opacity: 0.4 }} title="Delete">×</button>
+                        <button className="delete-btn interactive" onClick={() => deleteRoutine(routine.id)} style={{ color: 'var(--accent-orange)', opacity: 0.4 }} title="Delete">×</button>
                       </div>
                     )}
                   </div>
