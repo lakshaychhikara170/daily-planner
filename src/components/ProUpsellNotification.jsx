@@ -17,7 +17,14 @@ export default function ProUpsellNotification() {
     window.addEventListener('test_upsell_toast', handleTestUpsellToast);
     window.addEventListener('test_upsell_fullscreen', handleTestUpsellFullscreen);
 
-    if (isPro) return;
+    const cleanup = () => {
+      clearTimeout(timerRef.current);
+      window.removeEventListener('test_coffee_toast', handleTestCoffee);
+      window.removeEventListener('test_upsell_toast', handleTestUpsellToast);
+      window.removeEventListener('test_upsell_fullscreen', handleTestUpsellFullscreen);
+    };
+
+    if (isPro) return cleanup;
 
     const lastSeenStr = localStorage.getItem('execute_pro_fullscreen_last_seen');
     const lastSeen = lastSeenStr ? parseInt(lastSeenStr, 10) : 0;
@@ -43,12 +50,7 @@ export default function ProUpsellNotification() {
       // fallback
     }
 
-    return () => {
-      clearTimeout(timerRef.current);
-      window.removeEventListener('test_coffee_toast', handleTestCoffee);
-      window.removeEventListener('test_upsell_toast', handleTestUpsellToast);
-      window.removeEventListener('test_upsell_fullscreen', handleTestUpsellFullscreen);
-    };
+    return cleanup;
   }, [isPro]);
 
   const scheduleNextToast = (delay) => {
@@ -79,7 +81,7 @@ export default function ProUpsellNotification() {
 
   if (viewState === 'hidden') return null;
 
-  if (viewState === 'fullscreen' && !isPro) {
+  if (viewState === 'fullscreen') {
     return (
       <div style={{
         position: 'fixed',
@@ -291,7 +293,7 @@ export default function ProUpsellNotification() {
   }
 
   // Regular Toast State
-  if (viewState === 'toast' && !isPro) {
+  if (viewState === 'toast') {
     return (
       <div style={{
         position: 'fixed',
