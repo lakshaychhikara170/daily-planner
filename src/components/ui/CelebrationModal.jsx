@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { playSound } from '../../utils/soundUtils';
 
 export default function CelebrationModal({ celebration, onClose }) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     setIsVisible(true);
+    playSound('celebration');
   }, []);
 
   const handleClose = () => {

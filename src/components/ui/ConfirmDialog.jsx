@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
+import { playSound } from '../../utils/soundUtils';
 
 export default function ConfirmDialog({ config, onClose }) {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     setIsVisible(true);
-  }, []);
+    if (config.isDestructive) playSound('warning');
+    else playSound('pop');
+  }, [config.isDestructive]);
 
   const handleClose = () => {
     setIsVisible(false);

@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { AuthContext } from '../context/AuthContext';
+import { playSound } from '../utils/soundUtils';
 
 export default function ProUpsellNotification() {
   const { isPro } = useContext(AuthContext);
@@ -52,6 +53,14 @@ export default function ProUpsellNotification() {
 
     return cleanup;
   }, [isPro]);
+
+  useEffect(() => {
+    if (viewState === 'fullscreen' || viewState === 'toast') {
+      playSound('alert');
+    } else if (viewState === 'coffee_toast') {
+      playSound('pop');
+    }
+  }, [viewState]);
 
   const scheduleNextToast = (delay) => {
     if (showCountRef.current >= 3) return; // Max 3 times per session
