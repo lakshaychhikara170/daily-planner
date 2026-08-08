@@ -143,14 +143,10 @@ export default function Profile() {
         {/* Profile Section */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
+          <div style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
             <h2 style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 600, color: 'var(--text-color)', margin: 0 }}>
               Profile Details
             </h2>
-            <button className="interactive" style={{ background: 'none', border: 'none', color: 'var(--text-color)', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.35rem', fontWeight: 600, padding: 0 }}>
-              <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-              Edit
-            </button>
           </div>
           
           {/* Avatar and Info */}
