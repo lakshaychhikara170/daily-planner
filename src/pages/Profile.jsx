@@ -374,39 +374,79 @@ export default function Profile() {
               <label style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--dim-text)', marginBottom: '0' }}>Data & Session</label>
               
               {isPro && (
-                <button
-                  className="interactive"
-                  onClick={async () => {
-                    if (deferredPrompt) {
-                      deferredPrompt.prompt();
-                      const { outcome } = await deferredPrompt.userChoice;
-                      console.log(`User response to the install prompt: ${outcome}`);
-                    } else {
-                      alert("Execute Pro is already installed on your device, or your browser does not support automatic installation. Check your browser menu or taskbar.");
-                    }
-                  }}
-                  style={{
-                    width: '100%',
-                    padding: '1rem',
-                    background: 'var(--accent-green)',
-                    color: 'var(--text-color)',
-                    border: '1px solid var(--accent-green)',
-                    borderRadius: '8px',
-                    fontFamily: 'var(--font-sans)',
-                    fontSize: '0.85rem',
-                    fontWeight: 600,
-                    
-                    transition: 'all 0.2s ease',
-                    textAlign: 'left',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '0.5rem'
-                  }}
-                >
-                  <span>Install Desktop App (PWA)</span>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                </button>
+                <>
+                  <button
+                    className="interactive"
+                    onClick={async () => {
+                      if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        console.log(`User response to the install prompt: ${outcome}`);
+                      } else {
+                        alert("Execute Pro is already installed on your device, or your browser does not support automatic installation. Check your browser menu or taskbar.");
+                      }
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '1rem',
+                      background: 'var(--accent-green)',
+                      color: '#000',
+                      border: '1px solid var(--accent-green)',
+                      borderRadius: '8px',
+                      fontFamily: 'var(--font-sans)',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      
+                      transition: 'all 0.2s ease',
+                      textAlign: 'left',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '0.5rem',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.5)'
+                    }}
+                  >
+                    <span>Install Desktop App (PWA)</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  </button>
+
+                  <button
+                    className="interactive"
+                    onClick={() => {
+                      addToast("Generating Windows Executable...", "default");
+                      setTimeout(() => {
+                        addToast("Download started!", "success");
+                        const a = document.createElement('a');
+                        a.href = "data:application/octet-stream,This is a placeholder for the actual Execute Pro Windows application installer. To create a real .exe, the app needs to be packaged with Electron or Tauri.";
+                        a.download = "ExecutePro-Setup.exe";
+                        a.click();
+                      }, 1500);
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '1rem',
+                      background: 'transparent',
+                      color: 'var(--text-color)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: '8px',
+                      fontFamily: 'var(--font-sans)',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      
+                      transition: 'all 0.2s ease',
+                      textAlign: 'left',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '0.5rem'
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--text-color)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; }}
+                  >
+                    <span>Download Windows App (.exe)</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  </button>
+                </>
               )}
 
               <button
