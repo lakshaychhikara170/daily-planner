@@ -145,8 +145,8 @@ function AppInner() {
             title="Double-click to return to Dashboard"
             style={{
               position: 'fixed',
-              bottom: '70px',
-              right: '20px',
+              bottom: '20px',
+              left: '20px',
               zIndex: 9998,
               padding: '0.6rem 1rem',
               backgroundColor: 'var(--accent-green)',
