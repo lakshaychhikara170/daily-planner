@@ -142,7 +142,24 @@ function Schedule() {
 
   useEffect(() => {
     localStorage.setItem('dailyPlannerScheduleV2', JSON.stringify(scheduleBlocks));
+    // Dispatch so StickyWidget can pick it up instantly
+    window.dispatchEvent(new CustomEvent('scheduleUpdated', { detail: { source: 'SchedulePage' } }));
   }, [scheduleBlocks]);
+
+  // Listen for changes coming from StickyWidget (if widget adds ability to edit schedule)
+  useEffect(() => {
+    const handleScheduleUpdated = (e) => {
+      // Prevent infinite loop by ignoring our own events
+      if (e.detail && e.detail.source === 'SchedulePage') return;
+      
+      const saved = localStorage.getItem('dailyPlannerScheduleV2');
+      if (saved) {
+        setScheduleBlocks(JSON.parse(saved));
+      }
+    };
+    window.addEventListener('scheduleUpdated', handleScheduleUpdated);
+    return () => window.removeEventListener('scheduleUpdated', handleScheduleUpdated);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('dailyPlannerTemplates', JSON.stringify(templates));
@@ -253,7 +270,7 @@ function Schedule() {
   };
 
   return (
-    <main className="px-content py-section" style={{ backgroundColor: 'var(--text-color)', color: 'var(--bg-color)', minHeight: 'calc(100vh - 80px)', position: 'relative', overflow: 'hidden', padding: '8vw 4vw' }}>
+    <main className="px-content py-section" style={{ backgroundColor: 'var(--text-color)', color: 'var(--bg-color)', minHeight: 'calc(100vh - 80px)', position: 'relative', overflow: 'hidden' }}>
       
       {/* Energy Mode Toast */}
       <AnimatePresence>
@@ -389,7 +406,7 @@ function Schedule() {
       >
         <h1 style={{ 
           fontFamily: 'var(--font-serif)', 
-          fontSize: 'clamp(4rem, 8vw, 8rem)', 
+          fontSize: 'clamp(2.5rem, 8vw, 8rem)', 
           lineHeight: 1.05, 
           margin: 0, 
           letterSpacing: '-0.03em',

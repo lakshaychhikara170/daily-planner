@@ -3,6 +3,9 @@ import { AuthContext } from './AuthContext';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../utils/firebase';
 
+// Detect if running inside Electron
+export const isElectron = typeof window !== 'undefined' && !!window.electronAPI;
+
 export const AppContext = createContext();
 
 export function AppProvider({ children }) {
@@ -194,7 +197,7 @@ export function AppProvider({ children }) {
 
   // Sync state to Cloud
   useEffect(() => {
-    if (user && isPro && db) {
+    if (user && db) {
       const fetchCloudData = async () => {
         try {
           const docRef = doc(db, 'users', user.uid, 'data', 'sync');
@@ -205,6 +208,10 @@ export function AppProvider({ children }) {
             if (data.points !== undefined) setPoints(data.points);
             if (data.streak) setStreak(data.streak);
             if (data.isGamified !== undefined) setIsGamified(data.isGamified);
+            // Sync goals, schedule, routines to localStorage for StickyWidget and other components
+            if (data.goals) localStorage.setItem('dailyPlannerGoals', JSON.stringify(data.goals));
+            if (data.schedule) localStorage.setItem('dailyPlannerScheduleV2', JSON.stringify(data.schedule));
+            if (data.routines) localStorage.setItem('dailyPlannerRoutines', JSON.stringify(data.routines));
           }
         } catch (error) {
           console.error("Error fetching cloud data:", error);
@@ -215,23 +222,24 @@ export function AppProvider({ children }) {
     } else {
       setCloudSyncLoaded(true);
     }
-  }, [user, isPro]);
+  }, [user]);
 
   useEffect(() => {
-    if (user && isPro && cloudSyncLoaded && db) {
+    if (user && cloudSyncLoaded && db) {
       const syncTimeout = setTimeout(() => {
+        const goals = JSON.parse(localStorage.getItem('dailyPlannerGoals') || '[]');
+        const schedule = JSON.parse(localStorage.getItem('dailyPlannerScheduleV2') || '[]');
+        const routines = JSON.parse(localStorage.getItem('dailyPlannerRoutines') || '[]');
         const docRef = doc(db, 'users', user.uid, 'data', 'sync');
         setDoc(docRef, {
-          tasks,
-          points,
-          streak,
-          isGamified,
+          tasks, points, streak, isGamified,
+          goals, schedule, routines,
           updatedAt: new Date().toISOString()
         }, { merge: true }).catch(err => console.error("Cloud Sync error:", err));
-      }, 1500); // 1.5s debounce
+      }, 1500);
       return () => clearTimeout(syncTimeout);
     }
-  }, [tasks, points, streak, isGamified, user, isPro, cloudSyncLoaded]);
+  }, [tasks, points, streak, isGamified, user, cloudSyncLoaded]);
 
   // Timers
   useEffect(() => {

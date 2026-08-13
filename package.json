@@ -1,17 +1,89 @@
 {
   "name": "execute-pro",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "main": "electron/main.cjs",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "electron:dev": "concurrently -k \"vite\" \"cross-env NODE_ENV=development electron .\"",
+    "build:desktop": "vite build && electron-builder",
+    "build:win": "vite build && electron-builder --win",
+    "build:linux": "vite build && electron-builder --linux"
+  },
+  "build": {
+    "appId": "com.executepro.app",
+    "productName": "Execute Pro",
+    "copyright": "Copyright © 2025 Execute Pro",
+    "directories": {
+      "output": "release",
+      "buildResources": "public"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/main.cjs",
+      "electron/preload.cjs"
+    ],
+    "extraResources": [
+      {
+        "from": "public",
+        "to": "public",
+        "filter": [
+          "icon.png",
+          "favicon.ico"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "public/icon.png"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "public/icon.png",
+      "category": "Utility"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Execute Pro"
+    }
   },
   "dependencies": {
     "@paypal/react-paypal-js": "^10.3.0",
     "cors": "^2.8.6",
+    "cross-env": "^7.0.3",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "firebase": "^12.17.0",
@@ -30,6 +102,9 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
+    "concurrently": "^10.0.4",
+    "electron": "^43.3.0",
+    "electron-builder": "^26.15.3",
     "oxlint": "^1.71.0",
     "vite": "^8.1.1"
   }

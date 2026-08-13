@@ -64,7 +64,24 @@ function Routines() {
 
   useEffect(() => {
     localStorage.setItem('dailyPlannerRoutines', JSON.stringify(routines));
+    // Dispatch so StickyWidget can pick it up instantly
+    window.dispatchEvent(new CustomEvent('routinesUpdated', { detail: { source: 'RoutinesPage' } }));
   }, [routines]);
+
+  // Listen for changes coming from StickyWidget
+  useEffect(() => {
+    const handleRoutinesUpdated = (e) => {
+      // Prevent infinite loop by ignoring our own events
+      if (e.detail && e.detail.source === 'RoutinesPage') return;
+      
+      const saved = localStorage.getItem('dailyPlannerRoutines');
+      if (saved) {
+        setRoutines(JSON.parse(saved));
+      }
+    };
+    window.addEventListener('routinesUpdated', handleRoutinesUpdated);
+    return () => window.removeEventListener('routinesUpdated', handleRoutinesUpdated);
+  }, []);
 
   const [metrics, setMetrics] = useState(() => {
     const saved = localStorage.getItem('dailyPlannerMetricsDefs');
@@ -472,7 +489,7 @@ function Routines() {
   };
 
   return (
-    <main className="px-content py-section" style={{ padding: '4vw' }}>
+    <main className="px-content py-section">
       <style>{`
         .scroll-chart-container::-webkit-scrollbar {
           height: 6px;
@@ -567,7 +584,7 @@ function Routines() {
           <div style={{ 
             marginBottom: '6rem', 
             display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
             gap: '4rem' 
           }}>
             
@@ -576,7 +593,7 @@ function Routines() {
               <div style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', marginBottom: '3rem' }}>
                 <h3 style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.2em', color: 'var(--text-color)', opacity: 0.6, margin: 0 }}>Global Stats</h3>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', marginBottom: 'auto' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '3rem', marginBottom: 'auto' }}>
                 <div>
                   <div style={{ fontSize: '3.5rem', fontWeight: '400', fontFamily: 'var(--font-serif)', lineHeight: '1', marginBottom: '0.5rem', color: 'var(--accent-green)' }}>
                     {overallConsistency}<span style={{ fontSize: '2rem', color: 'var(--dim-text)', marginLeft: '0.25rem' }}>%</span>

@@ -11,7 +11,7 @@ import { useUI } from '../context/UIContext';
 
 export default function Profile() {
   const { currentTheme, loadPreset } = useThemeEditor();
-  const { user, isPro, logout, deferredPrompt } = useContext(AuthContext);
+  const { user, isPro, logout, loginWithGoogle, deferredPrompt } = useContext(AuthContext);
   const { points, levelInfo } = useContext(AppContext);
   const { showConfirm, addToast } = useUI();
   const [refresh, setRefresh] = useState(0);
@@ -126,8 +126,8 @@ export default function Profile() {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
       transition={{ duration: 0.3 }}
-      className="px-content" 
-      style={{ padding: '4rem 4vw', maxWidth: '1200px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '4rem' }}
+      className="px-content py-section" 
+      style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '4rem' }}
     >
       <header>
         <h1 style={{ fontSize: '4rem', margin: '0 0 1rem 0', fontFamily: 'var(--font-serif)', fontWeight: 'bold' }}>
@@ -138,7 +138,7 @@ export default function Profile() {
         </p>
       </header>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '4rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '4rem' }}>
         
         {/* Profile Section */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -150,7 +150,7 @@ export default function Profile() {
           </div>
           
           {/* Avatar and Info */}
-          <div style={{ display: 'flex', gap: '2.5rem', alignItems: 'flex-start' }}>
+          <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
             {/* Avatar */}
             <div style={{ position: 'relative', flexShrink: 0 }}>
               <div style={{ width: '100px', height: '100px', backgroundColor: 'var(--border-color)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
@@ -222,12 +222,42 @@ export default function Profile() {
                   <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: isPro ? 'var(--accent-green)' : 'var(--dim-text)', boxShadow: isPro ? '0 1px 4px rgba(0,0,0,0.8)' : 'none' }}></div>
                   {isPro ? 'LIFETIME PRO ACTIVATED' : 'FREE / LOCAL ONLY'}
                 </div>
+                {!user && (
+                  <button 
+                    onClick={async () => {
+                      try {
+                        await loginWithGoogle();
+                        addToast("Signed in successfully!", "success");
+                      } catch (e) {
+                        addToast("Failed to sign in.", "error");
+                      }
+                    }}
+                    className="interactive"
+                    style={{ 
+                      marginTop: '0.75rem',
+                      display: 'inline-flex', 
+                      alignItems: 'center', 
+                      gap: '0.5rem', 
+                      border: 'none', 
+                      borderRadius: '8px', 
+                      padding: '0.5rem 1rem', 
+                      fontSize: '0.75rem', 
+                      fontWeight: 'bold', 
+                      backgroundColor: 'var(--text-color)', 
+                      color: 'var(--bg-color)',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+                    Sign In to Sync
+                  </button>
+                )}
               </div>
             </div>
           </div>
 
           {/* Stats Row */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem', borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)', padding: '1.5rem 0' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1.5rem', borderTop: '1px solid var(--border-color)', borderBottom: '1px solid var(--border-color)', padding: '1.5rem 0' }}>
             {/* CURRENT LEVEL */}
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <div style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--dim-text)', marginBottom: '0.75rem', fontWeight: 600 }}>Current Level</div>
@@ -272,7 +302,7 @@ export default function Profile() {
           </div>
 
           {/* Consistency Box */}
-          <div style={{ backgroundColor: 'rgba(196, 243, 70, 0.08)', border: '1px solid rgba(196, 243, 70, 0.2)', borderRadius: '8px', padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          <div style={{ backgroundColor: 'rgba(196, 243, 70, 0.08)', border: '1px solid rgba(196, 243, 70, 0.2)', borderRadius: '8px', padding: '1.5rem', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem' }}>
             <div style={{ flexShrink: 0 }}>
               <svg width="40" height="40" viewBox="0 0 24 24" fill="var(--accent-green)" stroke="var(--text-color)" strokeWidth="1.5" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.8))' }}>
                 <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" />
@@ -413,14 +443,11 @@ export default function Profile() {
                   <button
                     className="interactive"
                     onClick={() => {
-                      addToast("Generating Windows Executable...", "default");
-                      setTimeout(() => {
-                        addToast("Download started!", "success");
-                        const a = document.createElement('a');
-                        a.href = "data:application/octet-stream,This is a placeholder for the actual Execute Pro Windows application installer. To create a real .exe, the app needs to be packaged with Electron or Tauri.";
-                        a.download = "ExecutePro-Setup.exe";
-                        a.click();
-                      }, 1500);
+                      addToast("Starting download...", "success");
+                      const a = document.createElement('a');
+                      a.href = "/ExecutePro-Setup.exe";
+                      a.download = "ExecutePro-Setup.exe";
+                      a.click();
                     }}
                     style={{
                       width: '100%',

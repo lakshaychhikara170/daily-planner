@@ -38,7 +38,8 @@ function Tasks() {
       x: 20 + Math.random() * 50,
       y: 20 + Math.random() * 50,
       width: 250,
-      height: 250
+      height: 250,
+      zIndex: 1
     };
 
     setTasks(prevTasks => {
@@ -79,6 +80,17 @@ function Tasks() {
     const currentMedia = tasks.find(t => t.id === taskId)?.media || [];
     setTasks(tasks.map(t => t.id === taskId ? { ...t, media: currentMedia.filter(m => m.id !== mediaId) } : t));
     if (activeTask && activeTask.id === taskId) setActiveTask(prev => ({ ...prev, media: currentMedia.filter(m => m.id !== mediaId) }));
+  };
+
+  const bringToFront = (taskId, mediaId) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task || !task.media) return;
+    
+    const highestZ = Math.max(0, ...task.media.map(m => m.zIndex || 1));
+    const newMedia = task.media.map(m => m.id === mediaId ? { ...m, zIndex: highestZ + 1 } : m);
+    
+    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, media: newMedia } : t));
+    if (activeTask && activeTask.id === taskId) setActiveTask(prev => ({ ...prev, media: newMedia }));
   };
 
   useEffect(() => {
@@ -143,7 +155,7 @@ function Tasks() {
   };
 
   return (
-    <main className="px-content py-section" style={{ padding: '8vw 4vw' }}>
+    <main className="px-content py-section">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -152,7 +164,7 @@ function Tasks() {
       >
         <h1 style={{ 
           fontFamily: 'var(--font-serif)', 
-          fontSize: 'clamp(4rem, 8vw, 8rem)', 
+          fontSize: 'clamp(2.5rem, 8vw, 8rem)', 
           lineHeight: 1.05, 
           margin: 0, 
           letterSpacing: '-0.03em',
@@ -352,7 +364,8 @@ function Tasks() {
                         setTasks(prev => prev.map(t => t.id === activeTask.id ? { ...t, media: newMedia } : t));
                         setActiveTask(prev => ({ ...prev, media: newMedia }));
                       }}
-                      onDelete={() => deleteMedia(activeTask.id, m.id)} 
+                      onDelete={() => deleteMedia(activeTask.id, m.id)}
+                      onBringToFront={() => bringToFront(activeTask.id, m.id)}
                     />
                   ))}
                 </div>
@@ -412,7 +425,7 @@ function Tasks() {
   );
 }
 
-function MediaElement({ media, onUpdate, onDelete }) {
+function MediaElement({ media, onUpdate, onDelete, onBringToFront }) {
   const [blobUrl, setBlobUrl] = useState(null);
 
   useEffect(() => {
@@ -444,10 +457,12 @@ function MediaElement({ media, onUpdate, onDelete }) {
       dragMomentum={false}
       initial={{ x: media.x || 0, y: media.y || 0 }}
       onDragEnd={(e, info) => onUpdate({ x: media.x + info.offset.x, y: media.y + info.offset.y })}
+      onPointerDown={onBringToFront}
       style={{
         position: 'absolute',
         width: media.width || 250,
         height: media.height || 250,
+        zIndex: media.zIndex || 1,
         pointerEvents: 'auto', // Important so we can interact with it on top of the textarea
         backgroundColor: 'rgba(255, 255, 255, 0.05)',
         backdropFilter: 'blur(10px)',

@@ -88,7 +88,7 @@ export default function ProUpsellNotification() {
     scheduleNextToast(600000); 
   };
 
-  if (viewState === 'hidden') return null;
+  if (isPro || viewState === 'hidden') return null;
 
   if (viewState === 'fullscreen') {
     return (

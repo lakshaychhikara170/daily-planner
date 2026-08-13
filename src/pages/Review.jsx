@@ -63,7 +63,7 @@ function Review() {
   const monthlyConsistency = monthlyHabitExpected > 0 ? Math.round((monthlyHabitChecks / monthlyHabitExpected) * 100) : 0;
 
   return (
-    <main className="px-content py-section" style={{ padding: '8vw 4vw' }}>
+    <main className="px-content py-section">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -72,7 +72,7 @@ function Review() {
       >
         <h1 style={{ 
           fontFamily: 'var(--font-serif)', 
-          fontSize: 'clamp(4rem, 8vw, 8rem)', 
+          fontSize: 'clamp(2.5rem, 8vw, 8rem)', 
           lineHeight: 1.05, 
           margin: 0, 
           letterSpacing: '-0.03em',
@@ -113,7 +113,7 @@ function Review() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '4rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '4rem' }}>
         {/* Insights Panel */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '4rem' }}>
           
