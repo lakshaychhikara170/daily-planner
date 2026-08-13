@@ -458,13 +458,10 @@ function Home() {
                       return (
                         <>
                           {timerStyle === 'compact' ? (
-                            /* ── Style 1: Compact dark overlay ── */
+                            /* ── Style 1: Original Design (Compact) ── */
                             <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                              <span style={{ fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '0.2em', opacity: 0.8, marginBottom: '1rem', textShadow: '0 2px 4px rgba(0,0,0,0.8)', color: '#fff' }}>
-                                Closest Deadline
-                              </span>
                               <h2 style={{ 
-                                fontSize: 'clamp(4rem, 8vw, 6rem)', 
+                                fontSize: 'clamp(6rem, 15vw, 10rem)', 
                                 lineHeight: 0.9, 
                                 margin: 0, 
                                 fontFamily: 'var(--font-sans)', 
