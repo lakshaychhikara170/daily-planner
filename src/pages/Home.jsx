@@ -26,8 +26,6 @@ function Home() {
   const [scheduleBlocks, setScheduleBlocks] = useState([]);
   const [goals, setGoals] = useState([]);
   const [routines, setRoutines] = useState([]);
-
-  const [routines, setRoutines] = useState([]);
   const [timerStyle, setTimerStyle] = useState(() => localStorage.getItem('home_timer_style') || 'cinematic');
 
   const toggleTimerStyle = (e) => {
