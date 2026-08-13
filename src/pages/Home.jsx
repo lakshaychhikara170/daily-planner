@@ -83,8 +83,8 @@ function Home() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 80px)', backgroundColor: 'var(--bg-color)' }}>
       
-      {/* --- ORIGINAL HOME PAGE CONTENT (Only show if NOT logged in) --- */}
-      {!user && (
+      {/* --- ORIGINAL HOME PAGE CONTENT (Only show if NOT logged in, OR if user wants to keep it) --- */}
+      {(!user || localStorage.getItem('keepLandingPage') === 'true') && (
         <main style={{ display: 'flex', flexDirection: 'column' }}>
           
           {/* ROW 1 - FULL WIDTH: Big Header */}

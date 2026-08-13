@@ -370,6 +370,38 @@ export default function Profile() {
                 )})}
               </div>
             </div>
+            
+            {/* Landing Page Toggle */}
+            <div>
+              <label style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--dim-text)', marginBottom: '1rem' }}>Startup Experience</label>
+              <div style={{ padding: '1.5rem', backgroundColor: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Show Landing Page</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--dim-text)' }}>Keep the original homepage visible when logged in.</div>
+                </div>
+                <button 
+                  onClick={() => {
+                    const current = localStorage.getItem('keepLandingPage') === 'true';
+                    localStorage.setItem('keepLandingPage', !current);
+                    setRefresh(r => r + 1);
+                    addToast(`Landing page ${!current ? 'enabled' : 'disabled'}.`, 'success');
+                  }}
+                  className="interactive"
+                  style={{ 
+                    fontSize: '0.75rem', 
+                    color: localStorage.getItem('keepLandingPage') === 'true' ? '#000' : 'var(--text-color)', 
+                    backgroundColor: localStorage.getItem('keepLandingPage') === 'true' ? 'var(--accent-green)' : 'transparent',
+                    fontWeight: 600, 
+                    border: `1px solid ${localStorage.getItem('keepLandingPage') === 'true' ? 'var(--accent-green)' : 'var(--border-color)'}`, 
+                    padding: '0.5rem 1rem', 
+                    borderRadius: '4px',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  {localStorage.getItem('keepLandingPage') === 'true' ? 'ENABLED' : 'ENABLE'}
+                </button>
+              </div>
+            </div>
 
             {/* Placeholder for Notifications */}
             <div>
