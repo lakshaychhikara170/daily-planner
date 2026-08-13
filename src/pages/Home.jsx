@@ -29,6 +29,7 @@ function Home() {
   const [timerStyle, setTimerStyle] = useState(() => localStorage.getItem('home_timer_style') || 'cinematic');
 
   const toggleTimerStyle = (e) => {
+    e.preventDefault();
     e.stopPropagation();
     const next = timerStyle === 'compact' ? 'cinematic' : 'compact';
     setTimerStyle(next);
