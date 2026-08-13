@@ -180,16 +180,108 @@ function Home() {
                       borderBottom: '1px solid var(--border-color)',
                       opacity: task.completed ? 0.5 : 1
                     }}>
-                    <div className="schedule-hour" style={{ opacity: 0.8, width: '120px', padding: '1rem 0', display: 'flex', alignItems: 'center', borderRight: '1px solid rgba(255,255,255,0.1)', marginRight: '1rem', fontFamily: 'var(--font-sans)', fontSize: '0.85rem' }}>
-                      {block.time || '—'}
-                    </div>
-                    <div className="schedule-content" style={{ flex: 1, padding: '1rem 0', display: 'flex', alignItems: 'center' }}>
-                      <span className={block.task ? "schedule-filled" : ""} style={{ fontSize: '1.25rem', opacity: block.task ? 1 : 0.3, fontStyle: block.task ? 'normal' : 'italic' }}>
-                        {block.task || 'Empty block...'}
+                      <div style={{ 
+                        width: '24px', 
+                        height: '24px', 
+                        borderRadius: '50%', 
+                        border: '1px solid var(--text-color)',
+                        backgroundColor: task.completed ? 'var(--text-color)' : 'transparent',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'var(--bg-color)',
+                        flexShrink: 0
+                      }}>
+                        {task.completed && '✓'}
+                      </div>
+                      <span style={{ fontSize: '1.25rem', fontFamily: 'var(--font-serif)', textDecoration: task.completed ? 'line-through' : 'none' }}>
+                        {task.text}
                       </span>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* RIGHT COLUMN: Schedule */}
+            <div 
+              className="interactive"
+              onClick={() => window.location.hash = '#/schedule'}
+              style={{ 
+                backgroundColor: 'var(--text-color)', 
+                color: 'var(--bg-color)',
+                padding: '4vw',
+                borderBottom: '1px solid var(--border-color)',
+                transition: 'background-color 0.3s ease',
+                position: 'relative',
+                overflow: 'hidden',
+                cursor: 'pointer'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1a1a1a'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--text-color)'}
+            >
+              {/* Glow effect */}
+              <div style={{ 
+                position: 'absolute', 
+                top: '20%', 
+                left: '10%', 
+                width: '400px', 
+                height: '400px', 
+                backgroundColor: 'var(--accent-green)', 
+                filter: 'blur(120px)', 
+                opacity: 0.15,
+                borderRadius: '50%',
+                zIndex: 0
+              }}></div>
+
+              {/* Arrow Button Top Right */}
+              <div style={{ 
+                position: 'absolute', 
+                top: '4vw', 
+                right: '4vw', 
+                width: '48px', 
+                height: '48px', 
+                borderRadius: '50%', 
+                backgroundColor: 'var(--accent-green)', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                color: 'var(--bg-color)', 
+                zIndex: 10 
+              }}>
+                <span style={{ fontSize: '1.2rem', transform: 'rotate(-45deg)' }}>→</span>
+              </div>
+
+              <div style={{ maxWidth: '800px', position: 'relative', zIndex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '4rem' }}>
+                  <span style={{ color: 'var(--accent-green)' }}>●</span>
+                  <span style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent-green)' }}>02 / Schedule</span>
+                </div>
+                
+                <h2 style={{ fontSize: '3rem', fontFamily: 'var(--font-serif)', marginBottom: '1rem', letterSpacing: '-0.02em', color: 'white' }}>
+                  Time you <span className="italic">actually use.</span>
+                </h2>
+                <p style={{ opacity: 0.7, marginBottom: '3rem', maxWidth: '400px', fontSize: '1.1rem', lineHeight: 1.6 }}>
+                  Click any hour block to type your focus.
+                </p>
+                
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', marginTop: '2rem' }}>
+                  {scheduleBlocks.length === 0 && (
+                    <div style={{ opacity: 0.5, fontStyle: 'italic', padding: '1.5rem 0' }}>No schedule blocks set for today.</div>
+                  )}
+                  {scheduleBlocks.map(block => (
+                    <div key={block.id} className="schedule-block" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', minHeight: '60px', pointerEvents: 'none', display: 'flex', alignItems: 'stretch' }}>
+                      <div className="schedule-hour" style={{ opacity: 0.8, width: '120px', padding: '1rem 0', display: 'flex', alignItems: 'center', borderRight: '1px solid rgba(255,255,255,0.1)', marginRight: '1rem', fontFamily: 'var(--font-sans)', fontSize: '0.85rem' }}>
+                        {block.time || '—'}
+                      </div>
+                      <div className="schedule-content" style={{ flex: 1, padding: '1rem 0', display: 'flex', alignItems: 'center' }}>
+                        <span className={block.task ? "schedule-filled" : ""} style={{ fontSize: '1.25rem', opacity: block.task ? 1 : 0.3, fontStyle: block.task ? 'normal' : 'italic' }}>
+                          {block.task || 'Empty block...'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
