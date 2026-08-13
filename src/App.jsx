@@ -137,6 +137,32 @@ function AppInner() {
         <ProUpsellNotification />
         <GamificationHUD />
         <ThemeEditor />
+        
+        {user && (
+          <button
+            className="interactive"
+            onDoubleClick={() => window.location.hash = '#/'}
+            title="Double-click to return to Dashboard"
+            style={{
+              position: 'fixed',
+              bottom: '70px',
+              right: '20px',
+              zIndex: 9998,
+              padding: '0.6rem 1rem',
+              backgroundColor: 'var(--accent-green)',
+              color: 'var(--bg-color)',
+              border: 'none',
+              borderRadius: '999px',
+              fontFamily: 'var(--font-sans)',
+              fontWeight: 700,
+              cursor: 'pointer',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+              fontSize: '0.8rem'
+            }}
+          >
+            Dashboard
+          </button>
+        )}
       </div>
     </>
   );
