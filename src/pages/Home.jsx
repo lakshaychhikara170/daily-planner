@@ -27,6 +27,16 @@ function Home() {
   const [goals, setGoals] = useState([]);
   const [routines, setRoutines] = useState([]);
 
+  const [routines, setRoutines] = useState([]);
+  const [timerStyle, setTimerStyle] = useState(() => localStorage.getItem('home_timer_style') || 'cinematic');
+
+  const toggleTimerStyle = (e) => {
+    e.stopPropagation();
+    const next = timerStyle === 'compact' ? 'cinematic' : 'compact';
+    setTimerStyle(next);
+    localStorage.setItem('home_timer_style', next);
+  };
+
   const dashboardRef = useRef(null);
 
   useEffect(() => {
@@ -410,7 +420,7 @@ function Home() {
                   borderRadius: '32px', 
                   background: 'linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)', 
                   backdropFilter: 'blur(20px)',
-                  border: '1px solid rgba(255,255,255,0.08)',
+                  border: '1px solid rgba(255,255,255,0.15)', /* Increased border visibility slightly */
                   display: 'flex', 
                   flexDirection: 'column', 
                   alignItems: 'center', 
@@ -424,37 +434,85 @@ function Home() {
                 {closestGoal ? (
                   <>
                     <CollageBackground mediaList={closestGoal.media || []} />
+                    
+                    {/* Style toggle button */}
+                    <button
+                      onClick={toggleTimerStyle}
+                      style={{
+                        position: 'absolute', top: '1.5rem', right: '1.5rem',
+                        zIndex: 20, background: 'rgba(255,255,255,0.15)',
+                        border: '1px solid rgba(255,255,255,0.3)', borderRadius: '20px',
+                        color: '#fff', fontSize: '0.65rem', fontWeight: 700,
+                        letterSpacing: '0.1em', textTransform: 'uppercase',
+                        padding: '0.4rem 0.8rem', cursor: 'pointer',
+                        backdropFilter: 'blur(6px)'
+                      }}
+                      title="Toggle timer style"
+                    >
+                      {timerStyle === 'compact' ? '⬛ Cinematic' : '🔲 Compact'}
+                    </button>
+
                     {(() => {
                       const daysPassed = getDaysPassed(closestGoal.startDate);
                       const daysLeft = Math.max(0, closestGoal.targetDays - daysPassed);
                       const progress = Math.min(100, (daysPassed / closestGoal.targetDays) * 100);
+                      const isDanger = daysLeft <= 10;
                       
                       return (
                         <>
-                          <h2 style={{ 
-                            fontSize: 'clamp(3rem, 6vw, 4rem)', 
-                            lineHeight: 0.85, 
-                            margin: 0, 
-                            fontFamily: 'var(--font-sans)', 
-                            fontWeight: 900,
-                            background: daysLeft <= 10 ? 'linear-gradient(180deg, var(--accent-red) 0%, rgba(255,0,0,0.3) 100%)' : 'linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,0.2) 100%)',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            letterSpacing: '-0.06em',
-                            zIndex: 1
-                          }}>
-                            {daysLeft}
-                          </h2>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '1rem', marginBottom: '2rem', zIndex: 1 }}>
-                            <span style={{ fontSize: '1.25rem', fontFamily: 'var(--font-sans)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.4em', color: daysLeft <= 10 ? 'var(--accent-red)' : 'rgba(255,255,255,0.6)' }}>
-                              Days Left
-                            </span>
-                          </div>
-                          <h3 style={{ fontSize: '2rem', fontFamily: 'var(--font-serif)', margin: 0, textAlign: 'center', zIndex: 1, textShadow: '0 10px 20px rgba(0,0,0,0.5)' }}>
+                          {timerStyle === 'compact' ? (
+                            /* ── Style 1: Compact dark overlay ── */
+                            <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                              <span style={{ fontSize: '1rem', textTransform: 'uppercase', letterSpacing: '0.2em', opacity: 0.8, marginBottom: '1rem', textShadow: '0 2px 4px rgba(0,0,0,0.8)', color: '#fff' }}>
+                                Closest Deadline
+                              </span>
+                              <h2 style={{ 
+                                fontSize: 'clamp(4rem, 8vw, 6rem)', 
+                                lineHeight: 0.9, 
+                                margin: 0, 
+                                fontFamily: 'var(--font-sans)', 
+                                fontWeight: 900,
+                                color: isDanger ? '#ff4444' : '#fff',
+                                textShadow: '0 10px 20px rgba(0,0,0,0.6)',
+                                letterSpacing: '-0.04em'
+                              }}>
+                                {daysLeft}
+                              </h2>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem', marginBottom: '2rem' }}>
+                                <span style={{ fontSize: '1.25rem', fontFamily: 'var(--font-sans)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.4em', color: isDanger ? '#ff4444' : 'rgba(255,255,255,0.8)' }}>
+                                  Days Left
+                                </span>
+                              </div>
+                            </div>
+                          ) : (
+                            /* ── Style 2: Cinematic big number ── */
+                            <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%' }}>
+                              <span style={{ fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '0.25em', opacity: 0.8, marginBottom: '0.5rem', color: '#fff', textShadow: '0 2px 8px rgba(0,0,0,0.9)' }}>
+                                Closest Deadline
+                              </span>
+                              <h2 style={{
+                                fontSize: 'clamp(8rem, 25vw, 12rem)',
+                                margin: 0, lineHeight: 0.85,
+                                fontFamily: 'var(--font-sans)', fontWeight: 900,
+                                color: isDanger ? '#ff4444' : '#fff',
+                                textShadow: '0 4px 40px rgba(0,0,0,0.7)',
+                                letterSpacing: '-0.04em'
+                              }}>
+                                {daysLeft}
+                              </h2>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '1rem', marginBottom: '2rem' }}>
+                                <div style={{ height: '2px', width: '40px', backgroundColor: 'rgba(255,255,255,0.5)' }} />
+                                <span style={{ fontSize: '1rem', letterSpacing: '0.4em', textTransform: 'uppercase', color: '#fff', opacity: 0.9, textShadow: '0 2px 8px rgba(0,0,0,0.9)', fontWeight: 600 }}>Days Left</span>
+                                <div style={{ height: '2px', width: '40px', backgroundColor: 'rgba(255,255,255,0.5)' }} />
+                              </div>
+                            </div>
+                          )}
+
+                          <h3 style={{ fontSize: '2.5rem', fontFamily: 'var(--font-serif)', margin: 0, textAlign: 'center', zIndex: 1, textShadow: '0 10px 20px rgba(0,0,0,0.5)', color: '#fff', padding: '0 1rem' }}>
                             {closestGoal.title}
                           </h3>
                           <div style={{ position: 'absolute', bottom: 0, left: 0, height: '6px', width: '100%', backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                            <div style={{ height: '100%', width: `${progress}%`, background: daysLeft <= 10 ? 'var(--accent-red)' : '#ffffff' }} />
+                            <div style={{ height: '100%', width: `${progress}%`, background: isDanger ? '#ff4444' : '#ffffff' }} />
                           </div>
                         </>
                       );
