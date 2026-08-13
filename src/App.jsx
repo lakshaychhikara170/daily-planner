@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { LayoutDashboard } from 'lucide-react';
 import CustomCursor from './components/CustomCursor';
 import Home from './pages/Home';
 import Tasks from './pages/Tasks';
@@ -148,19 +149,24 @@ function AppInner() {
               bottom: '20px',
               left: '20px',
               zIndex: 9998,
-              padding: '0.6rem 1rem',
-              backgroundColor: 'var(--accent-green)',
+              width: '48px',
+              height: '48px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'var(--text-color)',
               color: 'var(--bg-color)',
               border: 'none',
-              borderRadius: '999px',
-              fontFamily: 'var(--font-sans)',
-              fontWeight: 700,
+              borderRadius: '50%',
               cursor: 'pointer',
               boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-              fontSize: '0.8rem'
+              opacity: 0.8,
+              transition: 'opacity 0.2s, transform 0.2s',
             }}
+            onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'scale(1.05)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.opacity = '0.8'; e.currentTarget.style.transform = 'scale(1)'; }}
           >
-            Dashboard
+            <LayoutDashboard size={20} />
           </button>
         )}
       </div>
