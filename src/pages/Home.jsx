@@ -290,6 +290,7 @@ function Home() {
           </div>
         </div>
       </main>
+      )}
 
       {/* --- DASHBOARD CONTENT --- */}
       <section ref={dashboardRef} style={{ padding: '6vw 4vw', backgroundColor: '#050505', color: '#ffffff', borderTop: '1px solid var(--border-color)' }}>
