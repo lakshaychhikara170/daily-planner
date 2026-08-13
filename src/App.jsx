@@ -91,7 +91,7 @@ function AppInner() {
             <h2 style={{ fontSize: '1rem', fontWeight: 600, letterSpacing: '0.05em' }}>EXECUTE PRO<sup style={{ fontSize: '0.6em', verticalAlign: 'super' }}>©</sup></h2>
           </div>
           <div className="header-nav horizontal-scroll">
-            <a href="#/" className="interactive" style={{ opacity: getNavOpacity('#/'), textDecoration: 'none', color: 'inherit' }}>00 Home</a>
+            <a href="#/" className="interactive" style={{ opacity: getNavOpacity('#/'), textDecoration: 'none', color: 'inherit' }}>{user ? '00 Dashboard' : '00 Home'}</a>
             <a href="#/tasks" className="interactive" style={{ opacity: getNavOpacity('#/tasks'), textDecoration: 'none', color: 'inherit' }}>01 Tasks</a>
             <a href="#/schedule" className="interactive" style={{ opacity: getNavOpacity('#/schedule'), textDecoration: 'none', color: 'inherit' }}>02 Schedule</a>
             <a href="#/goals" className="interactive" style={{ opacity: getNavOpacity('#/goals'), textDecoration: 'none', color: 'inherit' }}>03 Goals</a>

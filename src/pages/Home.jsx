@@ -52,14 +52,7 @@ function Home() {
     if (savedRoutines) setRoutines(JSON.parse(savedRoutines));
   }, []);
 
-  // Auto-scroll to dashboard if Pro
-  useEffect(() => {
-    if (isPro && dashboardRef.current) {
-      setTimeout(() => {
-        dashboardRef.current.scrollIntoView({ behavior: 'smooth' });
-      }, 300);
-    }
-  }, [isPro]);
+
 
   // --- Widget Data Calculations ---
   const incompleteGoals = goals.filter(g => !g.isCompleted);
@@ -90,188 +83,103 @@ function Home() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: 'calc(100vh - 80px)', backgroundColor: 'var(--bg-color)' }}>
       
-      {/* --- ORIGINAL HOME PAGE CONTENT --- */}
-      <main style={{ display: 'flex', flexDirection: 'column' }}>
-        
-        {/* ROW 1 - FULL WIDTH: Big Header */}
-        <div style={{ 
-          padding: '6vw 4vw', 
-          borderBottom: '1px solid var(--border-color)',
-          position: 'relative' 
-        }}>
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
-            style={{ maxWidth: '1600px', margin: '0 auto' }}
-          >
-            <h1 style={{ 
-              fontFamily: 'var(--font-serif)', 
-              fontSize: 'clamp(2.5rem, 8vw, 8rem)', 
-              lineHeight: 1.05, 
-              margin: 0, 
-              letterSpacing: '-0.03em',
-              color: 'var(--text-color)'
-            }}>
-              A planner that <span className="italic" style={{ opacity: 0.6 }}>doesn't</span> whisper.<br/>
-              It speaks <span style={{ backgroundColor: 'var(--accent-green)', padding: '0 0.2em', display: 'inline-block', lineHeight: 1 }}>Focus.</span>
-            </h1>
-          </motion.div>
-        </div>
-
-        {/* ROW 2 - SPLIT GRID */}
-        <div className="grid-responsive" style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
+      {/* --- ORIGINAL HOME PAGE CONTENT (Only show if NOT logged in) --- */}
+      {!user && (
+        <main style={{ display: 'flex', flexDirection: 'column' }}>
           
-          {/* LEFT COLUMN: Tasks */}
-          <div 
-            className="interactive"
-            onClick={() => window.location.hash = '#/tasks'}
-            style={{ 
-              backgroundColor: 'var(--bg-color)',
-              padding: '4vw',
-              borderRight: '1px solid var(--border-color)',
-              borderBottom: '1px solid var(--border-color)',
-              transition: 'background-color 0.3s ease',
-              position: 'relative',
-              cursor: 'pointer'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.02)'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-color)'}
-          >
-            {/* Arrow Button Top Right */}
-            <div style={{ 
-              position: 'absolute', 
-              top: '4vw', 
-              right: '4vw', 
-              width: '48px', 
-              height: '48px', 
-              borderRadius: '50%', 
-              border: '1px solid var(--border-color)', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              opacity: 0.7
-            }}>
-              <span style={{ fontSize: '1.2rem', transform: 'rotate(-45deg)' }}>→</span>
-            </div>
-
-            <div style={{ maxWidth: '800px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '4rem' }}>
-                <span style={{ color: 'var(--accent-orange)' }}>●</span>
-                <span style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>01 / Action Items</span>
-              </div>
-              
-              <h3 style={{ fontSize: '3rem', fontFamily: 'var(--font-serif)', marginBottom: '1rem', letterSpacing: '-0.02em' }}>
-                Tasks that <span className="italic">pay back.</span>
-              </h3>
-              <p style={{ opacity: 0.7, marginBottom: '3rem', maxWidth: '400px', fontSize: '1.1rem', lineHeight: 1.6 }}>
-                Focus on the high-leverage activities. We obsess over completion, momentum, and everything below the click.
-              </p>
-              
-              <div style={{ display: 'flex', flexDirection: 'column', marginTop: '2rem' }}>
-                {tasks.length === 0 && (
-                  <div style={{ opacity: 0.5, fontStyle: 'italic', padding: '1rem 0' }}>No pending tasks right now.</div>
-                )}
-                {tasks.map(task => (
-                  <div key={task.id} style={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '1.5rem',
-                    padding: '1.25rem 0',
-                    borderBottom: '1px solid var(--border-color)',
-                    opacity: task.completed ? 0.5 : 1
-                  }}>
-                    <div style={{ 
-                      width: '24px', 
-                      height: '24px', 
-                      borderRadius: '50%', 
-                      border: '1px solid var(--text-color)',
-                      backgroundColor: task.completed ? 'var(--text-color)' : 'transparent',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: 'var(--bg-color)',
-                      flexShrink: 0
-                    }}>
-                      {task.completed && '✓'}
-                    </div>
-                    <span style={{ fontSize: '1.25rem', fontFamily: 'var(--font-serif)', textDecoration: task.completed ? 'line-through' : 'none' }}>
-                      {task.text}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
+          {/* ROW 1 - FULL WIDTH: Big Header */}
+          <div style={{ 
+            padding: '6vw 4vw', 
+            borderBottom: '1px solid var(--border-color)',
+            position: 'relative' 
+          }}>
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
+              style={{ maxWidth: '1600px', margin: '0 auto' }}
+            >
+              <h1 style={{ 
+                fontFamily: 'var(--font-serif)', 
+                fontSize: 'clamp(2.5rem, 8vw, 8rem)', 
+                lineHeight: 1.05, 
+                margin: 0, 
+                letterSpacing: '-0.03em',
+                color: 'var(--text-color)'
+              }}>
+                A planner that <span className="italic" style={{ opacity: 0.6 }}>doesn't</span> whisper.<br/>
+                It speaks <span style={{ backgroundColor: 'var(--accent-green)', padding: '0 0.2em', display: 'inline-block', lineHeight: 1 }}>Focus.</span>
+              </h1>
+            </motion.div>
           </div>
 
-          {/* RIGHT COLUMN: Schedule */}
-          <div 
-            className="interactive"
-            onClick={() => window.location.hash = '#/schedule'}
-            style={{ 
-              backgroundColor: 'var(--text-color)', 
-              color: 'var(--bg-color)',
-              padding: '4vw',
-              borderBottom: '1px solid var(--border-color)',
-              transition: 'background-color 0.3s ease',
-              position: 'relative',
-              overflow: 'hidden',
-              cursor: 'pointer'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1a1a1a'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--text-color)'}
-          >
-            {/* Glow effect */}
-            <div style={{ 
-              position: 'absolute', 
-              top: '20%', 
-              left: '10%', 
-              width: '400px', 
-              height: '400px', 
-              backgroundColor: 'var(--accent-green)', 
-              filter: 'blur(120px)', 
-              opacity: 0.15,
-              borderRadius: '50%',
-              zIndex: 0
-            }}></div>
-
-            {/* Arrow Button Top Right */}
-            <div style={{ 
-              position: 'absolute', 
-              top: '4vw', 
-              right: '4vw', 
-              width: '48px', 
-              height: '48px', 
-              borderRadius: '50%', 
-              backgroundColor: 'var(--accent-green)', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              color: 'var(--bg-color)', 
-              zIndex: 10 
-            }}>
-              <span style={{ fontSize: '1.2rem', transform: 'rotate(-45deg)' }}>→</span>
-            </div>
-
-            <div style={{ maxWidth: '800px', position: 'relative', zIndex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '4rem' }}>
-                <span style={{ color: 'var(--accent-green)' }}>●</span>
-                <span style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent-green)' }}>02 / Schedule</span>
+          {/* ROW 2 - SPLIT GRID */}
+          <div className="grid-responsive" style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
+            
+            {/* LEFT COLUMN: Tasks */}
+            <div 
+              className="interactive"
+              onClick={() => window.location.hash = '#/tasks'}
+              style={{ 
+                backgroundColor: 'var(--bg-color)',
+                padding: '4vw',
+                borderRight: '1px solid var(--border-color)',
+                borderBottom: '1px solid var(--border-color)',
+                transition: 'background-color 0.3s ease',
+                position: 'relative',
+                cursor: 'pointer'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.02)'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-color)'}
+            >
+              <div style={{ 
+                position: 'absolute', top: 0, right: 0, width: '100%', height: '100%', 
+                background: 'radial-gradient(circle at top right, rgba(0,0,0,0.03) 0%, transparent 70%)',
+                pointerEvents: 'none'
+              }}></div>
+              
+              <div style={{ 
+                position: 'absolute', 
+                top: '4vw', 
+                right: '4vw', 
+                width: '48px', 
+                height: '48px', 
+                borderRadius: '50%', 
+                border: '1px solid var(--text-color)', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                opacity: 0.7
+              }}>
+                <span style={{ fontSize: '1.2rem', transform: 'rotate(-45deg)' }}>→</span>
               </div>
-              
-              <h2 style={{ fontSize: '3rem', fontFamily: 'var(--font-serif)', marginBottom: '1rem', letterSpacing: '-0.02em', color: 'white' }}>
-                Time you <span className="italic">actually use.</span>
-              </h2>
-              <p style={{ opacity: 0.7, marginBottom: '3rem', maxWidth: '400px', fontSize: '1.1rem', lineHeight: 1.6 }}>
-                Click any hour block to type your focus.
-              </p>
-              
-              <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', marginTop: '2rem' }}>
-                {scheduleBlocks.length === 0 && (
-                  <div style={{ opacity: 0.5, fontStyle: 'italic', padding: '1.5rem 0' }}>No schedule blocks set for today.</div>
-                )}
-                {scheduleBlocks.map(block => (
-                  <div key={block.id} className="schedule-block" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)', minHeight: '60px', pointerEvents: 'none', display: 'flex', alignItems: 'stretch' }}>
+
+              <div style={{ maxWidth: '800px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '4rem' }}>
+                  <span style={{ color: 'var(--accent-orange)' }}>●</span>
+                  <span style={{ fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>01 / Action Items</span>
+                </div>
+                
+                <h3 style={{ fontSize: '3rem', fontFamily: 'var(--font-serif)', marginBottom: '1rem', letterSpacing: '-0.02em' }}>
+                  Tasks that <span className="italic">pay back.</span>
+                </h3>
+                <p style={{ opacity: 0.7, marginBottom: '3rem', maxWidth: '400px', fontSize: '1.1rem', lineHeight: 1.6 }}>
+                  Focus on the high-leverage activities. We obsess over completion, momentum, and everything below the click.
+                </p>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', marginTop: '2rem' }}>
+                  {tasks.length === 0 && (
+                    <div style={{ opacity: 0.5, fontStyle: 'italic', padding: '1rem 0' }}>No pending tasks right now.</div>
+                  )}
+                  {tasks.map(task => (
+                    <div key={task.id} style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '1.5rem',
+                      padding: '1.25rem 0',
+                      borderBottom: '1px solid var(--border-color)',
+                      opacity: task.completed ? 0.5 : 1
+                    }}>
                     <div className="schedule-hour" style={{ opacity: 0.8, width: '120px', padding: '1rem 0', display: 'flex', alignItems: 'center', borderRight: '1px solid rgba(255,255,255,0.1)', marginRight: '1rem', fontFamily: 'var(--font-sans)', fontSize: '0.85rem' }}>
                       {block.time || '—'}
                     </div>
