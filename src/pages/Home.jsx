@@ -285,7 +285,6 @@ function Home() {
               </div>
             </div>
           </div>
-        </div>
 
         {/* ROW 3 - LONG TERM GOALS */}
         <div 

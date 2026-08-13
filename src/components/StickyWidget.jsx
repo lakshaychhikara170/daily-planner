@@ -20,6 +20,13 @@ export default function StickyWidget() {
   const [newGoalTitle, setNewGoalTitle] = useState('');
   const [newGoalTargetDate, setNewGoalTargetDate] = useState('');
   const [focusTick, setFocusTick] = useState(0);
+  const [timerStyle, setTimerStyle] = useState(() => localStorage.getItem('widget_timer_style') || 'cinematic');
+  const toggleTimerStyle = (e) => {
+    e.stopPropagation();
+    const next = timerStyle === 'compact' ? 'cinematic' : 'compact';
+    setTimerStyle(next);
+    localStorage.setItem('widget_timer_style', next);
+  };
   
   useEffect(() => {
     const handler = () => setFocusTick(t => t + 1);
@@ -528,16 +535,58 @@ export default function StickyWidget() {
                           }}
                         >
                           <CollageBackground mediaList={displayGoal.media || []} />
-                          
-                          <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                            <span style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.2em', opacity: 0.6, marginBottom: '0.5rem', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
-                              {String(displayGoal.id) === focusId ? '⭐ Main Focus' : 'Closest Deadline'}
-                            </span>
-                            <h2 style={{ fontSize: '4rem', margin: 0, lineHeight: 0.9, fontFamily: 'var(--font-sans)', fontWeight: 900, color: isDanger ? 'var(--accent-red)' : '#fff', textShadow: '0 10px 20px rgba(0,0,0,0.6)' }}>
-                              {daysLeft}
-                            </h2>
-                            <span style={{ fontSize: '0.75rem', letterSpacing: '0.2em', textTransform: 'uppercase', marginTop: '0.25rem', opacity: 0.8, textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>Days Left</span>
-                          </div>
+
+                          {/* Style toggle button */}
+                          <button
+                            onClick={toggleTimerStyle}
+                            style={{
+                              position: 'absolute', top: '0.6rem', right: '0.6rem',
+                              zIndex: 20, background: 'rgba(255,255,255,0.15)',
+                              border: '1px solid rgba(255,255,255,0.3)', borderRadius: '20px',
+                              color: '#fff', fontSize: '0.55rem', fontWeight: 700,
+                              letterSpacing: '0.1em', textTransform: 'uppercase',
+                              padding: '0.2rem 0.5rem', cursor: 'pointer',
+                              backdropFilter: 'blur(6px)'
+                            }}
+                            title="Toggle timer style"
+                          >
+                            {timerStyle === 'compact' ? '⬛ Cinematic' : '🔲 Compact'}
+                          </button>
+
+                          {timerStyle === 'compact' ? (
+                            /* ── Style 1: Compact dark overlay ── */
+                            <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                              <span style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.2em', opacity: 0.6, marginBottom: '0.5rem', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
+                                {String(displayGoal.id) === focusId ? '⭐ Main Focus' : 'Closest Deadline'}
+                              </span>
+                              <h2 style={{ fontSize: '4rem', margin: 0, lineHeight: 0.9, fontFamily: 'var(--font-sans)', fontWeight: 900, color: isDanger ? '#ff4444' : '#fff', textShadow: '0 10px 20px rgba(0,0,0,0.6)' }}>
+                                {daysLeft}
+                              </h2>
+                              <span style={{ fontSize: '0.75rem', letterSpacing: '0.2em', textTransform: 'uppercase', marginTop: '0.25rem', opacity: 0.8, textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>Days Left</span>
+                            </div>
+                          ) : (
+                            /* ── Style 2: Cinematic big number ── */
+                            <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', width: '100%', padding: '0.5rem' }}>
+                              <span style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.25em', opacity: 0.7, marginBottom: '0.25rem', color: '#fff', textShadow: '0 2px 8px rgba(0,0,0,0.9)' }}>
+                                {String(displayGoal.id) === focusId ? '⭐ Main Focus' : 'Closest Deadline'}
+                              </span>
+                              <h2 style={{
+                                fontSize: 'clamp(5rem, 22vw, 8rem)',
+                                margin: 0, lineHeight: 0.85,
+                                fontFamily: 'var(--font-sans)', fontWeight: 900,
+                                color: isDanger ? '#ff4444' : '#fff',
+                                textShadow: '0 4px 40px rgba(0,0,0,0.7)',
+                                letterSpacing: '-0.04em'
+                              }}>
+                                {daysLeft}
+                              </h2>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.4rem' }}>
+                                <div style={{ height: '1px', width: '24px', backgroundColor: 'rgba(255,255,255,0.5)' }} />
+                                <span style={{ fontSize: '0.65rem', letterSpacing: '0.25em', textTransform: 'uppercase', color: '#fff', opacity: 0.85, textShadow: '0 2px 8px rgba(0,0,0,0.9)' }}>Days Left</span>
+                                <div style={{ height: '1px', width: '24px', backgroundColor: 'rgba(255,255,255,0.5)' }} />
+                              </div>
+                            </div>
+                          )}
                         </motion.div>
                         
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem', backgroundColor: 'transparent' }}>
