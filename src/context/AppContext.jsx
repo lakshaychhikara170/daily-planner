@@ -224,6 +224,20 @@ export function AppProvider({ children }) {
     }
   }, [user]);
 
+  // Listen for external updates so we can trigger cloud sync
+  const [externalSyncTrigger, setExternalSyncTrigger] = useState(0);
+  useEffect(() => {
+    const triggerSync = () => setExternalSyncTrigger(p => p + 1);
+    window.addEventListener('goalsUpdated', triggerSync);
+    window.addEventListener('scheduleUpdated', triggerSync);
+    window.addEventListener('routinesUpdated', triggerSync);
+    return () => {
+      window.removeEventListener('goalsUpdated', triggerSync);
+      window.removeEventListener('scheduleUpdated', triggerSync);
+      window.removeEventListener('routinesUpdated', triggerSync);
+    };
+  }, []);
+
   useEffect(() => {
     if (user && cloudSyncLoaded && db) {
       const syncTimeout = setTimeout(() => {
@@ -239,7 +253,7 @@ export function AppProvider({ children }) {
       }, 1500);
       return () => clearTimeout(syncTimeout);
     }
-  }, [tasks, points, streak, isGamified, user, cloudSyncLoaded]);
+  }, [tasks, points, streak, isGamified, user, cloudSyncLoaded, externalSyncTrigger]);
 
   // Timers
   useEffect(() => {
