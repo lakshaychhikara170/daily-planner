@@ -418,7 +418,7 @@ function Home() {
                   borderRadius: '32px', 
                   background: 'linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)', 
                   backdropFilter: 'blur(20px)',
-                  border: '1px solid rgba(255,255,255,0.15)', /* Increased border visibility slightly */
+                  border: '1px solid rgba(255,255,255,0.15)',
                   display: 'flex', 
                   flexDirection: 'column', 
                   alignItems: 'center', 
@@ -426,7 +426,11 @@ function Home() {
                   cursor: 'pointer',
                   position: 'relative',
                   overflow: 'hidden',
-                  boxShadow: '0 30px 60px rgba(0,0,0,0.4)'
+                  boxShadow: '0 30px 60px rgba(0,0,0,0.4)',
+                  // DYNAMIC LAYOUT BASED ON STYLE
+                  gridColumn: timerStyle === 'compact' ? '1 / -1' : 'span 2',
+                  gridRow: timerStyle === 'compact' ? 'span 1' : 'span 2',
+                  minHeight: timerStyle === 'compact' ? '400px' : 'auto'
                 }}
               >
                 {closestGoal ? (
