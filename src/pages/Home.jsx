@@ -382,9 +382,8 @@ function Home() {
         </div>
       </main>
 
-      {/* --- PRO DASHBOARD CONTENT --- */}
-      {isPro && (
-        <section ref={dashboardRef} style={{ padding: '6vw 4vw', backgroundColor: '#050505', color: '#ffffff', borderTop: '1px solid var(--border-color)' }}>
+      {/* --- DASHBOARD CONTENT --- */}
+      <section ref={dashboardRef} style={{ padding: '6vw 4vw', backgroundColor: '#050505', color: '#ffffff', borderTop: '1px solid var(--border-color)' }}>
           <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
             
             <header style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '2rem' }}>
@@ -706,8 +705,8 @@ function Home() {
 
             </div>
           </div>
-        </section>
-      )}
+      </section>
+
     </div>
   );
 }

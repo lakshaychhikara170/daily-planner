@@ -10,10 +10,25 @@ import {
   signInWithRedirect,
   getRedirectResult
 } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { auth, db } from '../utils/firebase';
 
 export const AuthContext = createContext();
+
+// ─── Hardcoded allowlists (guaranteed fallback) ───────────────────────────────
+const ADMIN_EMAILS = ['22tailedanime@gmail.com'];
+const PRO_EMAILS   = ['22tailedanime@gmail.com'];
+
+// ─── LocalStorage cache so status shows instantly on every refresh ────────────
+const setCachedStatus = (uid, isPro, isAdmin) => {
+  try { localStorage.setItem(`exec_status_${uid}`, JSON.stringify({ isPro, isAdmin })); } catch {}
+};
+const getCachedStatus = (uid) => {
+  try {
+    const raw = localStorage.getItem(`exec_status_${uid}`);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -24,87 +39,115 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
-      // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
-      // Stash the event so it can be triggered later.
       setDeferredPrompt(e);
     };
-
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
   }, []);
 
   useEffect(() => {
     if (!auth) {
       setLoading(false);
-      return; // Firebase not configured yet
+      return;
     }
 
-    // Handle Redirect Result for strict browsers (Brave, Safari)
-    getRedirectResult(auth).then((result) => {
-      if (result) {
-        console.log("Redirect login successful.");
-      }
-    }).catch((err) => {
-      console.error("Redirect login error:", err);
-    });
+    getRedirectResult(auth).catch((err) => console.error("Redirect login error:", err));
 
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser && db) {
-        // Fetch user data from Firestore to check Pro/Admin/Ban status
-        const userDocRef = doc(db, 'users', currentUser.uid);
-        try {
-          const userDoc = await getDoc(userDocRef);
-          if (userDoc.exists()) {
-            const data = userDoc.data();
+    let unsubscribeDoc = null; // real-time Firestore listener
+
+    const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
+      // Clean up previous Firestore listener if user changes
+      if (unsubscribeDoc) {
+        unsubscribeDoc();
+        unsubscribeDoc = null;
+      }
+
+      if (currentUser) {
+        setUser(currentUser);
+
+        // Apply cached values immediately (no flash of "Free")
+        const cached = getCachedStatus(currentUser.uid);
+        if (cached) {
+          setIsPro(cached.isPro);
+          setIsAdmin(cached.isAdmin);
+        }
+
+        if (db) {
+          const userDocRef = doc(db, 'users', currentUser.uid);
+
+          // ── Real-time listener: fires immediately + on every Firestore change ──
+          unsubscribeDoc = onSnapshot(userDocRef, async (snap) => {
+            if (!snap.exists()) {
+              // First-time user — create their doc
+              await setDoc(userDocRef, {
+                email: currentUser.email,
+                isPro: false,
+                isAdmin: false,
+                isBanned: false,
+                createdAt: new Date().toISOString()
+              });
+              // The snapshot will fire again after setDoc, so we'll get the update
+              return;
+            }
+
+            const data = snap.data();
+
             if (data.isBanned) {
-              alert("Your account has been banned due to a violation of our terms of service.");
-              signOut(auth);
-              setUser(null);
-              setIsPro(false);
-              setIsAdmin(false);
+              alert("Your account has been banned.");
+              await signOut(auth);
+              setUser(null); setIsPro(false); setIsAdmin(false);
               setLoading(false);
               return;
             }
-            setUser(currentUser);
-            setIsPro(data.isPro || false);
-            setIsAdmin(data.isAdmin || false);
-          } else {
-            // Create user document if it doesn't exist
-            await setDoc(userDocRef, {
-              email: currentUser.email,
-              isPro: false,
-              isAdmin: false,
-              isBanned: false,
-              createdAt: new Date().toISOString()
-            });
-            setUser(currentUser);
-            setIsPro(false);
-            setIsAdmin(false);
-          }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-          setUser(currentUser);
+
+            // Merge Firestore status with email allowlist
+            const proFinal   = data.isPro   === true || PRO_EMAILS.includes(currentUser.email?.toLowerCase());
+            const adminFinal = data.isAdmin === true || ADMIN_EMAILS.includes(currentUser.email?.toLowerCase());
+
+            setIsPro(proFinal);
+            setIsAdmin(adminFinal);
+            setCachedStatus(currentUser.uid, proFinal, adminFinal);
+
+            console.log(`[Auth] ${currentUser.email} → isPro:${proFinal} isAdmin:${adminFinal}`);
+            setLoading(false);
+          }, (error) => {
+            // Firestore read failed — fall back to email allowlist
+            console.error("[Auth] Firestore listener error:", error);
+            const proFinal   = PRO_EMAILS.includes(currentUser.email?.toLowerCase());
+            const adminFinal = ADMIN_EMAILS.includes(currentUser.email?.toLowerCase());
+            setIsPro(proFinal);
+            setIsAdmin(adminFinal);
+            setCachedStatus(currentUser.uid, proFinal, adminFinal);
+            setLoading(false);
+          });
+
+        } else {
+          // No Firestore — email allowlist only
+          const proFinal   = PRO_EMAILS.includes(currentUser.email?.toLowerCase());
+          const adminFinal = ADMIN_EMAILS.includes(currentUser.email?.toLowerCase());
+          setIsPro(proFinal);
+          setIsAdmin(adminFinal);
+          setLoading(false);
         }
+
       } else {
         setUser(null);
         setIsPro(false);
         setIsAdmin(false);
+        setLoading(false);
       }
-      
-      setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeDoc) unsubscribeDoc();
+    };
   }, []);
 
   const loginWithGoogle = async () => {
     if (!auth) throw new Error("Firebase not configured");
-    const provider = new GoogleAuthProvider();
-    return signInWithPopup(auth, provider);
+    return signInWithPopup(auth, new GoogleAuthProvider());
   };
 
   const loginWithEmail = async (email, password) => {
