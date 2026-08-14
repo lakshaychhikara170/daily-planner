@@ -127,6 +127,70 @@ app.post('/api/verify-payment', async (req, res) => {
     return res.status(500).json({ message: "Internal server error", error: error.message });
   }
 });
+// --- ADMIN ROUTES ---
+
+const verifyAdmin = async (req, res, next) => {
+  const uid = req.query.uid || req.body.adminUid;
+  if (!uid) return res.status(401).json({ message: "Unauthorized" });
+  
+  if (getApps().length === 0) return res.status(500).json({ message: "Firebase Admin not initialized" });
+  
+  try {
+    const db = getFirestore();
+    const doc = await db.collection('users').doc(uid).get();
+    if (doc.exists && doc.data().isAdmin) {
+      next();
+    } else {
+      res.status(403).json({ message: "Forbidden: Not an admin" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Server error checking admin status" });
+  }
+};
+
+app.get('/api/admin-users', verifyAdmin, async (req, res) => {
+  try {
+    const db = getFirestore();
+    const snapshot = await db.collection('users').get();
+    const users = [];
+    snapshot.forEach(doc => {
+      users.push({ id: doc.id, ...doc.data() });
+    });
+    res.status(200).json(users);
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ message: "Failed to fetch users" });
+  }
+});
+
+app.post('/api/admin-update-user', verifyAdmin, async (req, res) => {
+  const { targetUid, action } = req.body;
+  if (!targetUid || !action) return res.status(400).json({ message: "Missing targetUid or action" });
+
+  try {
+    const db = getFirestore();
+    const updateData = {};
+    if (action === 'ban') updateData.isBanned = true;
+    else if (action === 'unban') updateData.isBanned = false;
+    else if (action === 'grant_pro') updateData.isPro = true;
+    else if (action === 'revoke_pro') updateData.isPro = false;
+    else return res.status(400).json({ message: "Invalid action" });
+
+    await db.collection('users').doc(targetUid).update(updateData);
+    res.status(200).json({ message: "User updated successfully" });
+  } catch (error) {
+    console.error("Error updating user:", error);
+    res.status(500).json({ message: "Failed to update user" });
+  }
+});
+
+app.get('/api/admin-settings', verifyAdmin, async (req, res) => {
+  res.status(200).json({ razorpayPrice: 49900, paypalPrice: 9.99, notificationFrequency: 'daily' });
+});
+
+app.post('/api/admin-settings', verifyAdmin, async (req, res) => {
+  res.status(200).json({ message: "Settings saved" });
+});
 
 const PORT = 3001;
 app.listen(PORT, () => {
