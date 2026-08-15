@@ -477,8 +477,9 @@ export default function Profile() {
                     onClick={() => {
                       addToast("Starting download...", "success");
                       const a = document.createElement('a');
-                      a.href = "/ExecutePro-Setup.exe";
+                      a.href = "https://github.com/lakshaychhikara170/daily-planner/releases/latest/download/ExecutePro-Setup.exe";
                       a.download = "ExecutePro-Setup.exe";
+                      a.target = "_blank";
                       a.click();
                     }}
                     style={{
