@@ -3,9 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { AppContext } from '../context/AppContext';
 import { getMediaBlob } from '../utils/storage';
 
-export default function StickyWidget() {
+export default function StickyWidget({ standaloneMode = false }) {
   const { tasks, setTasks, addPoints } = useContext(AppContext);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(standaloneMode ? true : false);
   const [activeTab, setActiveTabState] = useState(() => localStorage.getItem('sticky_widget_tab') || 'goals');
   const setActiveTab = (tab) => {
     setActiveTabState(tab);
@@ -130,8 +130,14 @@ export default function StickyWidget() {
     const startHeight = widgetHeight;
 
     const doDrag = (dragEvent) => {
-      setWidgetWidth(Math.max(260, Math.min(800, startWidth + (dragEvent.clientX - startX))));
-      setWidgetHeight(Math.max(200, Math.min(800, startHeight + (dragEvent.clientY - startY))));
+      const newW = Math.max(260, Math.min(800, startWidth + (dragEvent.clientX - startX)));
+      const newH = Math.max(200, Math.min(800, startHeight + (dragEvent.clientY - startY)));
+      if (standaloneMode && window.electronAPI) {
+         window.electronAPI.resizeWidget(newW, newH + 60); // include header
+      } else {
+         setWidgetWidth(newW);
+         setWidgetHeight(newH);
+      }
     };
 
     const stopDrag = () => {
@@ -145,6 +151,11 @@ export default function StickyWidget() {
 
   const toggleOpen = () => {
     if (isDragging) return;
+    
+    if (standaloneMode && window.electronAPI) {
+      window.electronAPI.closeWidget();
+      return;
+    }
     
     if (!isOpen) {
       let newX = position.x;
@@ -292,45 +303,49 @@ export default function StickyWidget() {
 
   return (
     <motion.div
-      drag
+      drag={!standaloneMode}
       dragMomentum={false}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      animate={position}
-      initial={position}
+      onDragStart={!standaloneMode ? handleDragStart : undefined}
+      onDragEnd={!standaloneMode ? handleDragEnd : undefined}
+      animate={!standaloneMode ? position : undefined}
+      initial={!standaloneMode ? position : undefined}
       style={{
-        position: 'fixed',
+        position: standaloneMode ? 'relative' : 'fixed',
         top: 0,
         left: 0,
         zIndex: 9999,
-        width: isOpen ? `${widgetWidth}px` : 'auto',
+        width: standaloneMode ? '100vw' : (isOpen ? `${widgetWidth}px` : 'auto'),
+        height: standaloneMode ? '100vh' : 'auto',
         touchAction: 'none'
       }}
     >
       <div style={{
         backgroundColor: 'var(--accent-green)',
         color: '#0A0A0A',
-        border: '2px solid #0A0A0A',
-        boxShadow: '6px 6px 0px rgba(0,0,0,0.8)',
+        border: standaloneMode ? 'none' : '2px solid #0A0A0A',
+        boxShadow: standaloneMode ? 'none' : '6px 6px 0px rgba(0,0,0,0.8)',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
         transition: 'border-radius 0s',
-        borderRadius: isOpen ? '16px' : '9999px',
-        cursor: isOpen ? 'default' : 'grab',
-        position: 'relative'
+        borderRadius: standaloneMode ? '16px' : (isOpen ? '16px' : '9999px'),
+        cursor: standaloneMode ? 'default' : (isOpen ? 'default' : 'grab'),
+        position: 'relative',
+        height: '100%',
+        width: '100%'
       }}>
         
         {/* Header / Toggle Button */}
         <div 
-          onClick={toggleOpen}
+          onClick={!standaloneMode ? toggleOpen : undefined}
           style={{
             padding: isOpen ? '0.75rem 1rem' : '0.5rem 1rem',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             borderBottom: isOpen ? '2px solid #0A0A0A' : 'none',
-            cursor: isDragging ? 'grabbing' : 'pointer',
+            cursor: standaloneMode ? 'move' : (isDragging ? 'grabbing' : 'pointer'),
+            WebkitAppRegion: standaloneMode ? 'drag' : 'none',
             backgroundColor: 'var(--accent-green)',
             fontWeight: 800,
             fontSize: '0.85rem',
@@ -343,47 +358,49 @@ export default function StickyWidget() {
             <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
             {isOpen ? 'Execute Pro Mini' : `${pendingTasks.length} Pending`}
           </div>
-          {isOpen && (
-            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path></svg>
-          )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', WebkitAppRegion: 'no-drag' }}>
+            {isOpen && (
+              <svg onClick={toggleOpen} style={{ cursor: 'pointer' }} width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d={standaloneMode ? "M6 18L18 6M6 6l12 12" : "M19 9l-7 7-7-7"}></path></svg>
+            )}
+          </div>
         </div>
 
         {/* Content */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
+              initial={{ height: standaloneMode ? 'auto' : 0, opacity: standaloneMode ? 1 : 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0 }}
-              style={{ backgroundColor: (activeTab === 'dashboard' || activeTab === 'goals') ? '#e2e2da' : '#f6f6f1' }}
+              style={{ backgroundColor: (activeTab === 'dashboard' || activeTab === 'goals') ? '#e2e2da' : '#f6f6f1', flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}
             >
               {/* Tab Selector */}
               <div style={{ display: 'flex', borderBottom: '1px solid #ccc' }}>
                 <button 
                   onClick={() => setActiveTab('dashboard')} 
-                  style={{ flex: 1, padding: '0.5rem', background: activeTab === 'dashboard' || activeTab === 'goals' ? '#e2e2da' : 'transparent', border: 'none', borderRight: '1px solid #ccc', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', cursor: 'pointer' }}>
+                  style={{ flex: 1, padding: '0.5rem', background: activeTab === 'dashboard' || activeTab === 'goals' ? '#e2e2da' : 'transparent', border: 'none', borderRight: '1px solid #ccc', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', cursor: 'pointer', WebkitAppRegion: 'no-drag' }}>
                   Dashboard
                 </button>
                 <button 
                   onClick={(e) => { e.stopPropagation(); setActiveTab('tasks'); }}
-                  style={{ flex: 1, padding: '0.5rem', background: activeTab === 'tasks' ? '#e2e2da' : 'transparent', border: 'none', borderRight: '1px solid #ccc', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', cursor: 'pointer' }}>
+                  style={{ flex: 1, padding: '0.5rem', background: activeTab === 'tasks' ? '#e2e2da' : 'transparent', border: 'none', borderRight: '1px solid #ccc', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', cursor: 'pointer', WebkitAppRegion: 'no-drag' }}>
                   Tasks
                 </button>
                 <button 
                   onClick={(e) => { e.stopPropagation(); setActiveTab('schedule'); }}
-                  style={{ flex: 1, padding: '0.5rem', background: activeTab === 'schedule' ? '#e2e2da' : 'transparent', border: 'none', borderRight: '1px solid #ccc', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', cursor: 'pointer' }}>
+                  style={{ flex: 1, padding: '0.5rem', background: activeTab === 'schedule' ? '#e2e2da' : 'transparent', border: 'none', borderRight: '1px solid #ccc', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', cursor: 'pointer', WebkitAppRegion: 'no-drag' }}>
                   Schedule
                 </button>
                 <button 
                   onClick={(e) => { e.stopPropagation(); setActiveTab('routines'); }}
-                  style={{ flex: 1, padding: '0.5rem', background: activeTab === 'routines' ? '#e2e2da' : 'transparent', border: 'none', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', cursor: 'pointer' }}>
+                  style={{ flex: 1, padding: '0.5rem', background: activeTab === 'routines' ? '#e2e2da' : 'transparent', border: 'none', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', cursor: 'pointer', WebkitAppRegion: 'no-drag' }}>
                   Routines
                 </button>
               </div>
 
               {/* Tab Content */}
-              <div style={{ padding: (activeTab === 'dashboard' || activeTab === 'goals') ? '0.5rem' : '1rem', height: `${widgetHeight}px`, overflowY: 'auto' }}>
+              <div style={{ padding: (activeTab === 'dashboard' || activeTab === 'goals') ? '0.5rem' : '1rem', flex: 1, overflowY: 'auto' }}>
                 
                 {/* Tasks Tab */}
                 {activeTab === 'tasks' && (
@@ -546,7 +563,8 @@ export default function StickyWidget() {
                               color: '#fff', fontSize: '0.55rem', fontWeight: 700,
                               letterSpacing: '0.1em', textTransform: 'uppercase',
                               padding: '0.2rem 0.5rem', cursor: 'pointer',
-                              backdropFilter: 'blur(6px)'
+                              backdropFilter: 'blur(6px)',
+                              WebkitAppRegion: 'no-drag'
                             }}
                             title="Toggle timer style"
                           >
@@ -630,7 +648,8 @@ export default function StickyWidget() {
                     justifyContent: 'center',
                     backgroundColor: 'rgba(0,0,0,0.05)',
                     borderTopLeftRadius: '8px',
-                    zIndex: 10
+                    zIndex: 10,
+                    WebkitAppRegion: 'no-drag'
                   }}
                   title="Drag to resize horizontally and vertically"
                 >

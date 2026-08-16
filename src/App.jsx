@@ -103,6 +103,12 @@ function AppInner() {
           </div>
           <div className="header-actions">
             <span style={{ fontSize: '0.85rem', opacity: 0.7 }}>IST - 21:55</span>
+            {window.electronAPI && (
+              <button className="interactive"
+                onClick={() => window.electronAPI.openWidget()}
+                style={{ backgroundColor: 'transparent', color: 'var(--text-color)', border: '1px solid var(--border-color)', borderRadius: '9999px', padding: '0.4rem 1rem', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer' }}
+              >Sticky Widget</button>
+            )}
             {!user && (
               <button className="interactive"
                 onClick={async () => { try { await loginWithGoogle(); } catch (e) { console.error("Login failed", e); } }}
@@ -132,7 +138,7 @@ function AppInner() {
         {currentHash === '#/admin' && <Admin />}
 
         <FloatingTimer />
-        <StickyWidget />
+        {!window.electronAPI && <StickyWidget />}
         <FullscreenTimer />
         <TaskCompletionPrompt />
         <ProUpsellNotification />

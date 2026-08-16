@@ -154,6 +154,10 @@ ipcMain.on('widget-close', () => {
   if (widgetWindow) widgetWindow.hide();
 });
 
+ipcMain.on('widget-open', () => {
+  toggleWidget();
+});
+
 ipcMain.on('widget-resize', (_, { width, height }) => {
   if (widgetWindow) widgetWindow.setSize(width, height);
 });
