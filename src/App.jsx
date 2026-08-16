@@ -32,6 +32,7 @@ function WidgetStandalone() {
   return (
     <ThemeProvider>
       <EditModeProvider>
+        <style>{`body, html, #root { background: transparent !important; }`}</style>
         <div style={{
           width: '100vw', height: '100vh',
           background: 'transparent', overflow: 'hidden',
