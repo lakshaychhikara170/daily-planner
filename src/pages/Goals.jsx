@@ -28,7 +28,7 @@ function Goals() {
     window.dispatchEvent(new CustomEvent('goalsUpdated', { detail: { source: 'GoalsPage' } }));
   }, [goals]);
 
-  // Listen for changes coming from StickyWidget
+  // Listen for changes coming from StickyWidget or Cloud Sync
   useEffect(() => {
     const handleGoalsUpdated = (e) => {
       if (e.detail && e.detail.source === 'GoalsPage') return;
@@ -38,7 +38,11 @@ function Goals() {
       }
     };
     window.addEventListener('goalsUpdated', handleGoalsUpdated);
-    return () => window.removeEventListener('goalsUpdated', handleGoalsUpdated);
+    window.addEventListener('cloudDataLoaded', handleGoalsUpdated);
+    return () => {
+      window.removeEventListener('goalsUpdated', handleGoalsUpdated);
+      window.removeEventListener('cloudDataLoaded', handleGoalsUpdated);
+    };
   }, []);
 
   const addGoal = (e) => {

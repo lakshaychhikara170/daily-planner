@@ -59,7 +59,24 @@ function Routines() {
 
   useEffect(() => {
     localStorage.setItem('dailyPlannerRoutines', JSON.stringify(routines));
+    window.dispatchEvent(new CustomEvent('routinesUpdated', { detail: { source: 'RoutinesPage' } }));
   }, [routines]);
+
+  useEffect(() => {
+    const handleRoutinesUpdated = (e) => {
+      if (e.detail && e.detail.source === 'RoutinesPage') return;
+      const saved = localStorage.getItem('dailyPlannerRoutines');
+      if (saved) {
+        setRoutines(JSON.parse(saved));
+      }
+    };
+    window.addEventListener('routinesUpdated', handleRoutinesUpdated);
+    window.addEventListener('cloudDataLoaded', handleRoutinesUpdated);
+    return () => {
+      window.removeEventListener('routinesUpdated', handleRoutinesUpdated);
+      window.removeEventListener('cloudDataLoaded', handleRoutinesUpdated);
+    };
+  }, []);
 
   const [sleepHistory, setSleepHistory] = useState(() => {
     const saved = localStorage.getItem('dailyPlannerSleep');

@@ -146,7 +146,7 @@ function Schedule() {
     window.dispatchEvent(new CustomEvent('scheduleUpdated', { detail: { source: 'SchedulePage' } }));
   }, [scheduleBlocks]);
 
-  // Listen for changes coming from StickyWidget (if widget adds ability to edit schedule)
+  // Listen for changes coming from StickyWidget (if widget adds ability to edit schedule) or Cloud Sync
   useEffect(() => {
     const handleScheduleUpdated = (e) => {
       // Prevent infinite loop by ignoring our own events
@@ -158,7 +158,11 @@ function Schedule() {
       }
     };
     window.addEventListener('scheduleUpdated', handleScheduleUpdated);
-    return () => window.removeEventListener('scheduleUpdated', handleScheduleUpdated);
+    window.addEventListener('cloudDataLoaded', handleScheduleUpdated);
+    return () => {
+      window.removeEventListener('scheduleUpdated', handleScheduleUpdated);
+      window.removeEventListener('cloudDataLoaded', handleScheduleUpdated);
+    };
   }, []);
 
   useEffect(() => {

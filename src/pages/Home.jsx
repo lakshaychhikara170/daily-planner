@@ -39,17 +39,24 @@ function Home() {
   const dashboardRef = useRef(null);
 
   useEffect(() => {
-    const savedTasks = localStorage.getItem('dailyPlannerTasks');
-    if (savedTasks) setTasks(JSON.parse(savedTasks));
+    const loadData = () => {
+      const savedTasks = localStorage.getItem('dailyPlannerTasks');
+      if (savedTasks) setTasks(JSON.parse(savedTasks));
 
-    const savedSchedule = localStorage.getItem('dailyPlannerScheduleV2');
-    if (savedSchedule) setScheduleBlocks(JSON.parse(savedSchedule));
+      const savedSchedule = localStorage.getItem('dailyPlannerScheduleV2');
+      if (savedSchedule) setScheduleBlocks(JSON.parse(savedSchedule));
 
-    const savedGoals = localStorage.getItem('dailyPlannerGoals');
-    if (savedGoals) setGoals(JSON.parse(savedGoals));
+      const savedGoals = localStorage.getItem('dailyPlannerGoals');
+      if (savedGoals) setGoals(JSON.parse(savedGoals));
 
-    const savedRoutines = localStorage.getItem('dailyPlannerRoutines');
-    if (savedRoutines) setRoutines(JSON.parse(savedRoutines));
+      const savedRoutines = localStorage.getItem('dailyPlannerRoutines');
+      if (savedRoutines) setRoutines(JSON.parse(savedRoutines));
+    };
+
+    loadData();
+
+    window.addEventListener('cloudDataLoaded', loadData);
+    return () => window.removeEventListener('cloudDataLoaded', loadData);
   }, []);
 
 

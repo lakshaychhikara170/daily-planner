@@ -212,6 +212,7 @@ export function AppProvider({ children }) {
             if (data.goals) localStorage.setItem('dailyPlannerGoals', JSON.stringify(data.goals));
             if (data.schedule) localStorage.setItem('dailyPlannerScheduleV2', JSON.stringify(data.schedule));
             if (data.routines) localStorage.setItem('dailyPlannerRoutines', JSON.stringify(data.routines));
+            window.dispatchEvent(new Event('cloudDataLoaded'));
           }
         } catch (error) {
           console.error("Error fetching cloud data:", error);
