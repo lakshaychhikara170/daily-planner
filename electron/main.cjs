@@ -145,6 +145,8 @@ function createTray() {
     if (mainWindow) {
       mainWindow.show();
       mainWindow.focus();
+    } else {
+      createMainWindow();
     }
   });
 }
@@ -190,6 +192,8 @@ app.whenReady().then(() => {
     if (mainWindow) {
       if (mainWindow.isMinimized()) mainWindow.restore();
       mainWindow.focus();
+    } else {
+      createMainWindow();
     }
   });
 
