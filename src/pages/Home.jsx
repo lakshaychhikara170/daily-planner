@@ -730,7 +730,7 @@ function CollageBackground({ mediaList }) {
     const loadImages = async () => {
       for (const m of mediaList || []) {
         if (m.type && m.type.startsWith('image/')) {
-          const blob = await getMediaBlob(m.id);
+          const blob = await getMediaBlob(m.id, user?.uid);
           if (blob && active) {
             const url = URL.createObjectURL(blob);
             loadedUrls.push({ id: m.id, url });

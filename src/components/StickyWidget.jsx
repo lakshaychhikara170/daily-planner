@@ -2,9 +2,11 @@ import React, { useContext, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AppContext } from '../context/AppContext';
 import { getMediaBlob } from '../utils/storage';
+import { AuthContext } from '../context/AuthContext';
 
 export default function StickyWidget({ standaloneMode = false }) {
   const { tasks, setTasks, addPoints } = useContext(AppContext);
+  const { user } = useContext(AuthContext);
   const [isOpen, setIsOpen] = useState(true);
   const [activeTab, setActiveTabState] = useState(() => localStorage.getItem('sticky_widget_tab') || 'goals');
   const setActiveTab = (tab) => {
@@ -697,7 +699,7 @@ function CollageBackground({ mediaList }) {
     const loadImages = async () => {
       for (const m of mediaList || []) {
         if (m.type && m.type.startsWith('image/')) {
-          const blob = await getMediaBlob(m.id);
+          const blob = await getMediaBlob(m.id, user?.uid);
           if (blob && active) {
             const url = URL.createObjectURL(blob);
             loadedUrls.push({ id: m.id, url });

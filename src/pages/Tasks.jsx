@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { saveMediaBlob, deleteMediaBlob, getMediaBlob } from '../utils/storage';
 import { AppContext } from '../context/AppContext';
+import { AuthContext } from '../context/AuthContext';
 import { useUI } from '../context/UIContext';
 
 function Tasks() {
@@ -12,6 +13,7 @@ function Tasks() {
     setTrackedTask, setIsFocusMode, setFocusTimeLeft, setIsFocusTimerActive, setCountdown
   } = useContext(AppContext);
   
+  const { user } = useContext(AuthContext);
   const { showConfirm, addToast, showCelebration } = useUI();
   
   const [isAddingTask, setIsAddingTask] = useState(true); 
@@ -31,7 +33,7 @@ function Tasks() {
   const processFile = async (file) => {
     if (!file || !activeTask) return;
     
-    const mediaId = await saveMediaBlob(file);
+    const mediaId = await saveMediaBlob(file, user?.uid);
     const newMediaObj = {
       id: mediaId,
       type: file.type,
@@ -76,7 +78,7 @@ function Tasks() {
   };
 
   const deleteMedia = async (taskId, mediaId) => {
-    await deleteMediaBlob(mediaId);
+    await deleteMediaBlob(mediaId, user?.uid);
     const currentMedia = tasks.find(t => t.id === taskId)?.media || [];
     setTasks(tasks.map(t => t.id === taskId ? { ...t, media: currentMedia.filter(m => m.id !== mediaId) } : t));
     if (activeTask && activeTask.id === taskId) setActiveTask(prev => ({ ...prev, media: currentMedia.filter(m => m.id !== mediaId) }));
@@ -430,7 +432,7 @@ function MediaElement({ media, onUpdate, onDelete, onBringToFront }) {
 
   useEffect(() => {
     let url = null;
-    getMediaBlob(media.id).then(blob => {
+    getMediaBlob(media.id, null).then(blob => {
       if (blob) {
         url = URL.createObjectURL(blob);
         setBlobUrl(url);

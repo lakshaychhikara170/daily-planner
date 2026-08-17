@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { AuthContext } from './AuthContext';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../utils/firebase';
 
 // Detect if running inside Electron
@@ -197,32 +197,54 @@ export function AppProvider({ children }) {
 
   // Sync state to Cloud
   useEffect(() => {
+    let unsubscribe = null;
     if (user && db) {
-      const fetchCloudData = async () => {
-        try {
-          const docRef = doc(db, 'users', user.uid, 'data', 'sync');
-          const docSnap = await getDoc(docRef);
-          if (docSnap.exists()) {
-            const data = docSnap.data();
-            if (data.tasks) setTasks(data.tasks);
-            if (data.points !== undefined) setPoints(data.points);
-            if (data.streak) setStreak(data.streak);
-            if (data.isGamified !== undefined) setIsGamified(data.isGamified);
-            // Sync goals, schedule, routines to localStorage for StickyWidget and other components
-            if (data.goals) localStorage.setItem('dailyPlannerGoals', JSON.stringify(data.goals));
-            if (data.schedule) localStorage.setItem('dailyPlannerScheduleV2', JSON.stringify(data.schedule));
-            if (data.routines) localStorage.setItem('dailyPlannerRoutines', JSON.stringify(data.routines));
-            window.dispatchEvent(new Event('cloudDataLoaded'));
+      const docRef = doc(db, 'users', user.uid, 'data', 'sync');
+      
+      unsubscribe = onSnapshot(docRef, (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          // To prevent infinite loops, only apply incoming data if it's not the exact same as local state
+          if (data.tasks && JSON.stringify(data.tasks) !== JSON.stringify(tasks)) setTasks(data.tasks);
+          if (data.points !== undefined && data.points !== points) setPoints(data.points);
+          if (data.streak && JSON.stringify(data.streak) !== JSON.stringify(streak)) setStreak(data.streak);
+          if (data.isGamified !== undefined && data.isGamified !== isGamified) setIsGamified(data.isGamified);
+          
+          // Sync goals, schedule, routines to localStorage
+          let updatedLocalStorage = false;
+          if (data.goals && JSON.stringify(data.goals) !== localStorage.getItem('dailyPlannerGoals')) {
+            localStorage.setItem('dailyPlannerGoals', JSON.stringify(data.goals));
+            updatedLocalStorage = true;
           }
-        } catch (error) {
-          console.error("Error fetching cloud data:", error);
+          if (data.schedule && JSON.stringify(data.schedule) !== localStorage.getItem('dailyPlannerScheduleV2')) {
+            localStorage.setItem('dailyPlannerScheduleV2', JSON.stringify(data.schedule));
+            updatedLocalStorage = true;
+          }
+          if (data.routines && JSON.stringify(data.routines) !== localStorage.getItem('dailyPlannerRoutines')) {
+            localStorage.setItem('dailyPlannerRoutines', JSON.stringify(data.routines));
+            updatedLocalStorage = true;
+          }
+          
+          if (updatedLocalStorage) {
+            window.dispatchEvent(new Event('cloudDataLoaded'));
+            // Trigger internal update events so components re-render
+            window.dispatchEvent(new Event('goalsUpdated'));
+            window.dispatchEvent(new Event('scheduleUpdated'));
+            window.dispatchEvent(new Event('routinesUpdated'));
+          }
         }
         setCloudSyncLoaded(true);
-      };
-      fetchCloudData();
+      }, (error) => {
+        console.error("Error with cloud sync listener:", error);
+        setCloudSyncLoaded(true);
+      });
     } else {
       setCloudSyncLoaded(true);
     }
+    
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, [user]);
 
   // Listen for external updates so we can trigger cloud sync

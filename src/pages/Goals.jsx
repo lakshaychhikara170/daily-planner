@@ -80,7 +80,7 @@ function Goals() {
   const processFile = async (file) => {
     if (!file || !activeGoal) return;
     
-    const mediaId = await saveMediaBlob(file);
+    const mediaId = await saveMediaBlob(file, user?.uid);
     const newMediaObj = {
       id: mediaId,
       type: file.type,
@@ -122,7 +122,7 @@ function Goals() {
   };
 
   const deleteMedia = async (goalId, mediaId) => {
-    await deleteMediaBlob(mediaId);
+    await deleteMediaBlob(mediaId, user?.uid);
     const currentMedia = goals.find(g => g.id === goalId)?.media || [];
     setGoals(prev => prev.map(g => g.id === goalId ? { ...g, media: currentMedia.filter(m => m.id !== mediaId) } : g));
     if (activeGoal && activeGoal.id === goalId) setActiveGoal(prev => ({ ...prev, media: currentMedia.filter(m => m.id !== mediaId) }));
@@ -593,7 +593,7 @@ function MediaElement({ media, onUpdate, onDelete, onBringToFront }) {
 
   useEffect(() => {
     let url = null;
-    getMediaBlob(media.id).then(blob => {
+    getMediaBlob(media.id, null).then(blob => {
       if (blob) {
         url = URL.createObjectURL(blob);
         setBlobUrl(url);
@@ -660,7 +660,7 @@ function CollageBackground({ mediaList }) {
     const loadImages = async () => {
       for (const m of mediaList || []) {
         if (m.type && m.type.startsWith('image/')) {
-          const blob = await getMediaBlob(m.id);
+          const blob = await getMediaBlob(m.id, user?.uid);
           if (blob && active) {
             const url = URL.createObjectURL(blob);
             loadedUrls.push({ id: m.id, url });
