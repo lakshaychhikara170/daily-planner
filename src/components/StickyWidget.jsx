@@ -5,7 +5,7 @@ import { getMediaBlob } from '../utils/storage';
 
 export default function StickyWidget({ standaloneMode = false }) {
   const { tasks, setTasks, addPoints } = useContext(AppContext);
-  const [isOpen, setIsOpen] = useState(standaloneMode ? true : false);
+  const [isOpen, setIsOpen] = useState(true);
   const [activeTab, setActiveTabState] = useState(() => localStorage.getItem('sticky_widget_tab') || 'goals');
   const setActiveTab = (tab) => {
     setActiveTabState(tab);
@@ -152,17 +152,23 @@ export default function StickyWidget({ standaloneMode = false }) {
   const toggleOpen = () => {
     if (isDragging) return;
     
+    const nextOpen = !isOpen;
+    
+    // In standalone Electron mode, resize the window to match collapsed/expanded state
     if (standaloneMode && window.electronAPI) {
-      window.electronAPI.closeWidget();
-      return;
+      if (nextOpen) {
+        window.electronAPI.resizeWidget(300, 480);
+      } else {
+        window.electronAPI.resizeWidget(220, 44);
+      }
     }
     
-    if (!isOpen) {
+    if (!standaloneMode && !isOpen) {
       let newX = position.x;
       let newY = position.y;
       
       const currentWidth = widgetWidth;
-      const currentHeight = widgetHeight + 60; // approx header height
+      const currentHeight = widgetHeight + 60;
       
       if (newX + currentWidth > window.innerWidth) {
         newX = Math.max(0, window.innerWidth - currentWidth - 20);
@@ -178,7 +184,13 @@ export default function StickyWidget({ standaloneMode = false }) {
       }
     }
     
-    setIsOpen(!isOpen);
+    setIsOpen(nextOpen);
+  };
+
+  const hideWidget = () => {
+    if (standaloneMode && window.electronAPI) {
+      window.electronAPI.closeWidget();
+    }
   };
   const toggleTask = (id) => {
     setTasks(prev => prev.map(task => {
@@ -337,14 +349,14 @@ export default function StickyWidget({ standaloneMode = false }) {
         
         {/* Header / Toggle Button */}
         <div 
-          onClick={!standaloneMode ? toggleOpen : undefined}
+          onClick={toggleOpen}
           style={{
             padding: isOpen ? '0.75rem 1rem' : '0.5rem 1rem',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             borderBottom: isOpen ? '2px solid #0A0A0A' : 'none',
-            cursor: standaloneMode ? 'move' : (isDragging ? 'grabbing' : 'pointer'),
+            cursor: standaloneMode ? 'default' : (isDragging ? 'grabbing' : 'pointer'),
             WebkitAppRegion: standaloneMode ? 'drag' : 'none',
             backgroundColor: 'var(--accent-green)',
             fontWeight: 800,
@@ -360,7 +372,14 @@ export default function StickyWidget({ standaloneMode = false }) {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', WebkitAppRegion: 'no-drag' }}>
             {isOpen && (
-              <svg onClick={toggleOpen} style={{ cursor: 'pointer' }} width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d={standaloneMode ? "M6 18L18 6M6 6l12 12" : "M19 9l-7 7-7-7"}></path></svg>
+              <>
+                {/* Collapse button */}
+                <svg onClick={(e) => { e.stopPropagation(); toggleOpen(); }} style={{ cursor: 'pointer' }} width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path></svg>
+                {/* Close / hide widget button (standalone only) */}
+                {standaloneMode && (
+                  <svg onClick={(e) => { e.stopPropagation(); hideWidget(); }} style={{ cursor: 'pointer', marginLeft: '0.25rem' }} width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                )}
+              </>
             )}
           </div>
         </div>

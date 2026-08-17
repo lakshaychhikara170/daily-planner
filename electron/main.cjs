@@ -173,6 +173,25 @@ ipcMain.on('open-main-window', () => {
   }
 });
 
+// ─── Data Sync between Main ↔ Widget ─────────────────────────────────────────
+ipcMain.on('sync-data-to-widget', (_, data) => {
+  if (widgetWindow && !widgetWindow.isDestroyed()) {
+    widgetWindow.webContents.send('data-synced', data);
+  }
+});
+
+ipcMain.on('sync-data-to-main', (_, data) => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('data-synced', data);
+  }
+});
+
+ipcMain.on('request-data-from-main', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send('data-requested');
+  }
+});
+
 // ─── App Ready ────────────────────────────────────────────────────────────────
 app.whenReady().then(() => {
   // Enforce single instance

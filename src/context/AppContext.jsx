@@ -256,6 +256,67 @@ export function AppProvider({ children }) {
     }
   }, [tasks, points, streak, isGamified, user, cloudSyncLoaded, externalSyncTrigger]);
 
+  // ─── Electron IPC: Sync localStorage between main window ↔ widget window ───
+  useEffect(() => {
+    if (!window.electronAPI) return;
+
+    const isWidget = window.location.hash.includes('/widget');
+
+    // Gather all localStorage keys relevant for sync
+    const gatherSyncData = () => ({
+      dailyPlannerTasks: localStorage.getItem('dailyPlannerTasks'),
+      dailyPlannerGoals: localStorage.getItem('dailyPlannerGoals'),
+      dailyPlannerScheduleV2: localStorage.getItem('dailyPlannerScheduleV2'),
+      dailyPlannerRoutines: localStorage.getItem('dailyPlannerRoutines'),
+      dailyPlannerPoints: localStorage.getItem('dailyPlannerPoints'),
+      dailyPlannerStreak: localStorage.getItem('dailyPlannerStreak'),
+      dailyPlannerGamified: localStorage.getItem('dailyPlannerGamified'),
+      dailyPlannerQuests: localStorage.getItem('dailyPlannerQuests'),
+      dailyPlannerSound: localStorage.getItem('dailyPlannerSound'),
+    });
+
+    const applySyncData = (data) => {
+      if (!data) return;
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          localStorage.setItem(key, value);
+        }
+      });
+      // Update React state from the received localStorage data
+      try {
+        if (data.dailyPlannerTasks) setTasks(JSON.parse(data.dailyPlannerTasks));
+        if (data.dailyPlannerPoints) setPoints(parseInt(data.dailyPlannerPoints, 10));
+        if (data.dailyPlannerStreak) setStreak(JSON.parse(data.dailyPlannerStreak));
+        if (data.dailyPlannerGamified) setIsGamified(JSON.parse(data.dailyPlannerGamified));
+      } catch (e) { console.error('Error applying synced data:', e); }
+      // Dispatch events so StickyWidget picks up schedule/routines/goals changes
+      window.dispatchEvent(new Event('goalsUpdated'));
+      window.dispatchEvent(new Event('scheduleUpdated'));
+      window.dispatchEvent(new Event('routinesUpdated'));
+    };
+
+    // Listen for incoming synced data
+    window.electronAPI.onDataSync((data) => {
+      applySyncData(data);
+    });
+
+    if (isWidget) {
+      // Widget: request initial data from the main window on load
+      window.electronAPI.requestDataFromMain();
+    } else {
+      // Main window: respond to data requests from widget
+      window.electronAPI.onDataRequest(() => {
+        window.electronAPI.sendDataToWidget(gatherSyncData());
+      });
+
+      // Main window: push data to widget whenever relevant state changes
+      const pushTimer = setTimeout(() => {
+        window.electronAPI.sendDataToWidget(gatherSyncData());
+      }, 500);
+      return () => clearTimeout(pushTimer);
+    }
+  }, [tasks, points, streak, isGamified, externalSyncTrigger]);
+
   // Timers
   useEffect(() => {
     let interval = null;
