@@ -474,13 +474,25 @@ export default function Profile() {
 
                   <button
                     className="interactive"
-                    onClick={() => {
-                      addToast("Starting download...", "success");
-                      const a = document.createElement('a');
-                      a.href = "https://github.com/lakshaychhikara170/daily-planner/releases/latest/download/ExecutePro-Setup.exe";
-                      a.download = "ExecutePro-Setup.exe";
-                      a.target = "_blank";
-                      a.click();
+                    onClick={async () => {
+                      addToast("Fetching latest version...", "info");
+                      try {
+                        const res = await fetch("https://api.github.com/repos/lakshaychhikara170/daily-planner/releases/latest");
+                        const data = await res.json();
+                        const exeAsset = data.assets?.find(a => a.name.endsWith('.exe'));
+                        if (exeAsset) {
+                          addToast("Starting download...", "success");
+                          const a = document.createElement('a');
+                          a.href = exeAsset.browser_download_url;
+                          a.download = exeAsset.name;
+                          a.target = "_blank";
+                          a.click();
+                        } else {
+                          addToast("No .exe found in the latest release.", "error");
+                        }
+                      } catch (err) {
+                        addToast("Failed to fetch latest release.", "error");
+                      }
                     }}
                     style={{
                       width: '100%',
