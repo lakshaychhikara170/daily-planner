@@ -23,12 +23,7 @@ jobs:
     - name: Install Dependencies
       run: npm install
 
-    - name: Build Electron Windows App
-      run: npm run build:win
-
-    - name: Create Release and Upload Asset
+    - name: Build and Publish Electron App
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        gh release create v1.0.1 --title "Execute Pro 1.0.1" --notes "Fix transparent widget rendering." || true
-        gh release upload v1.0.1 release2/*.exe --clobber
+      run: npm run build:win -- -c.publish.provider=github -c.publish.releaseType=release --publish always
