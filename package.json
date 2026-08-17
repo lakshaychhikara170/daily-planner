@@ -1,7 +1,7 @@
 {
   "name": "execute-pro",
   "private": true,
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "electron/main.cjs",
   "type": "module",
   "scripts": {
@@ -22,6 +22,13 @@
       "output": "release3",
       "buildResources": "public"
     },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "lakshaychhikara170",
+        "repo": "daily-planner"
+      }
+    ],
     "files": [
       "dist/**/*",
       "electron/main.cjs",

@@ -26,4 +26,4 @@ jobs:
     - name: Build and Publish Electron App
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: npm run build:win -- -c.publish.provider=github -c.publish.releaseType=release --publish always
+      run: npm run build:win -- -p always
