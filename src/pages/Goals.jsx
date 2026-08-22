@@ -3,16 +3,27 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { saveMediaBlob, deleteMediaBlob, getMediaBlob } from '../utils/storage';
 import { AuthContext } from '../context/AuthContext';
 import { AppContext } from '../context/AppContext';
+import { CheckCircle2 } from 'lucide-react';
 
 function Goals() {
   const { user, loginWithGoogle } = useContext(AuthContext);
   const [goals, setGoals] = useState(() => {
     const saved = localStorage.getItem('dailyPlannerGoals');
-    return saved ? JSON.parse(saved) : [];
+    let parsed = saved ? JSON.parse(saved) : [];
+    let maxId = Math.max(0, ...parsed.map(g => Number(g.id)).filter(id => !isNaN(id)));
+    parsed = parsed.map(g => {
+      if (!g.id || isNaN(Number(g.id))) {
+        maxId++;
+        return { ...g, id: maxId };
+      }
+      return g;
+    });
+    return parsed;
   });
 
   const [newGoalTitle, setNewGoalTitle] = useState('');
   const [newGoalTargetDate, setNewGoalTargetDate] = useState('');
+  const [newSubtaskText, setNewSubtaskText] = useState('');
   const [activeGoal, setActiveGoal] = useState(null);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   
@@ -49,7 +60,8 @@ function Goals() {
     e.preventDefault();
     if (!newGoalTitle.trim() || !newGoalTargetDate) return;
     
-    const newId = goals.length > 0 ? Math.max(...goals.map(g => g.id)) + 1 : 1;
+    const validIds = goals.map(g => Number(g.id)).filter(id => !isNaN(id));
+    const newId = validIds.length > 0 ? Math.max(...validIds) + 1 : 1;
     const startStr = new Date().toISOString().split('T')[0];
     const start = new Date(startStr);
     const end = new Date(newGoalTargetDate);
@@ -64,7 +76,8 @@ function Goals() {
       startDate: startStr,
       isCompleted: false,
       details: '',
-      media: []
+      media: [],
+      subtasks: []
     };
 
     setGoals([...goals, goal]);
@@ -145,6 +158,45 @@ function Goals() {
 
   const deleteGoal = (id) => {
     setGoals(prev => prev.filter(g => g.id !== id));
+  };
+
+  const addSubtask = (goalId, text) => {
+    if (!text.trim()) return;
+    const newSubtask = { id: Date.now(), text: text.trim(), completed: false };
+    setGoals(prev => prev.map(g => {
+      if (g.id === goalId) {
+        return { ...g, subtasks: [...(g.subtasks || []), newSubtask] };
+      }
+      return g;
+    }));
+    if (activeGoal && activeGoal.id === goalId) {
+      setActiveGoal(prev => ({ ...prev, subtasks: [...(prev.subtasks || []), newSubtask] }));
+    }
+  };
+
+  const toggleSubtask = (goalId, subtaskId) => {
+    setGoals(prev => prev.map(g => {
+      if (g.id === goalId) {
+        const newSubtasks = (g.subtasks || []).map(st => st.id === subtaskId ? { ...st, completed: !st.completed } : st);
+        return { ...g, subtasks: newSubtasks };
+      }
+      return g;
+    }));
+    if (activeGoal && activeGoal.id === goalId) {
+      setActiveGoal(prev => ({ ...prev, subtasks: (prev.subtasks || []).map(st => st.id === subtaskId ? { ...st, completed: !st.completed } : st) }));
+    }
+  };
+
+  const deleteSubtask = (goalId, subtaskId) => {
+    setGoals(prev => prev.map(g => {
+      if (g.id === goalId) {
+        return { ...g, subtasks: (g.subtasks || []).filter(st => st.id !== subtaskId) };
+      }
+      return g;
+    }));
+    if (activeGoal && activeGoal.id === goalId) {
+      setActiveGoal(prev => ({ ...prev, subtasks: (prev.subtasks || []).filter(st => st.id !== subtaskId) }));
+    }
   };
 
   const getDaysPassed = (startDate) => {
@@ -367,6 +419,15 @@ function Goals() {
                 {closestGoal.title}
               </h3>
               
+              {closestGoal.subtasks && closestGoal.subtasks.length > 0 && (
+                <div style={{ marginTop: '1rem', zIndex: 1, position: 'relative', background: 'rgba(0,0,0,0.3)', padding: '0.5rem 1rem', borderRadius: '999px', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <CheckCircle2 size={16} color="var(--accent-green)" />
+                  <span style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)' }}>
+                    {closestGoal.subtasks.filter(s => s.completed).length} / {closestGoal.subtasks.length} Milestones
+                  </span>
+                </div>
+              )}
+              
               {/* Premium glowing progress bar */}
               <div style={{ position: 'absolute', bottom: 0, left: 0, height: '6px', width: '100%', backgroundColor: 'rgba(0,0,0,0.2)' }}>
                 <div style={{ 
@@ -434,8 +495,16 @@ function Goals() {
                         <h3 style={{ margin: 0, fontSize: '1.5rem', fontFamily: 'var(--font-serif)', textDecoration: goal.isCompleted ? 'line-through' : 'none', opacity: goal.isCompleted ? 0.5 : 1 }}>
                           {goal.title}
                         </h3>
-                        <p style={{ margin: 0, fontSize: '0.85rem', opacity: 0.6, marginTop: '4px' }}>
+                        <p style={{ margin: 0, fontSize: '0.85rem', opacity: 0.6, marginTop: '4px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           Target: {goal.targetDate ? new Date(goal.targetDate).toLocaleDateString() : 'N/A'} • {goal.targetDays} Day Challenge
+                          {goal.subtasks && goal.subtasks.length > 0 && (
+                            <>
+                              <span>•</span>
+                              <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: 'var(--accent-green)' }}>
+                                <CheckCircle2 size={12} /> {goal.subtasks.filter(s => s.completed).length}/{goal.subtasks.length} Milestones
+                              </span>
+                            </>
+                          )}
                         </p>
                       </div>
                     </div>
@@ -495,7 +564,7 @@ function Goals() {
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               onClick={e => e.stopPropagation()}
               style={{
-                width: '100%', maxWidth: '600px', backgroundColor: 'var(--bg-color)',
+                width: '100%', maxWidth: '900px', backgroundColor: 'var(--bg-color)',
                 borderLeft: '1px solid var(--border-color)', padding: '3rem',
                 display: 'flex', flexDirection: 'column', position: 'relative'
               }}
@@ -540,44 +609,101 @@ function Goals() {
                 </div>
               </div>
 
-              <div 
-                style={{ 
-                  flex: 1, position: 'relative', overflow: 'hidden', 
-                  borderRadius: '8px',
-                  backgroundColor: isDraggingOver ? 'rgba(212, 245, 54, 0.05)' : 'transparent',
-                  border: isDraggingOver ? '1px dashed #D4F536' : '1px solid transparent',
-                  transition: 'all 0.2s ease'
-                }}
-                onDragOver={(e) => { e.preventDefault(); setIsDraggingOver(true); }}
-                onDragLeave={() => setIsDraggingOver(false)}
-                onDrop={handleDrop}
-              >
-                <textarea
-                  autoFocus
-                  placeholder="Add goal details..."
-                  value={activeGoal.details || ''}
-                  onChange={e => updateGoalDetails(activeGoal.id, e.target.value)}
-                  style={{
-                    width: '100%', height: '100%', backgroundColor: 'transparent', border: 'none', resize: 'none',
-                    outline: 'none', color: 'var(--text-color)', fontSize: '1.1rem',
-                    fontFamily: 'var(--font-serif)', lineHeight: '1.6', position: 'absolute', top: 0, left: 0, zIndex: 1
+              <div style={{ display: 'flex', gap: '2rem', flex: 1, overflow: 'hidden' }}>
+                <div 
+                  style={{ 
+                    flex: 1, position: 'relative', overflow: 'hidden', 
+                    borderRadius: '8px',
+                    backgroundColor: isDraggingOver ? 'rgba(212, 245, 54, 0.05)' : 'transparent',
+                    border: isDraggingOver ? '1px dashed #D4F536' : '1px solid transparent',
+                    transition: 'all 0.2s ease',
+                    display: 'flex', flexDirection: 'column'
                   }}
-                />
-                
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 2, pointerEvents: 'none' }}>
-                  {(activeGoal.media || []).map(m => (
-                    <MediaElement 
-                      key={m.id} 
-                      media={m} 
-                      onUpdate={(newPos) => {
-                        const newMedia = (activeGoal.media || []).map(item => item.id === m.id ? { ...item, ...newPos } : item);
-                        setGoals(prev => prev.map(g => g.id === activeGoal.id ? { ...g, media: newMedia } : g));
-                        setActiveGoal(prev => ({ ...prev, media: newMedia }));
-                      }}
-                      onDelete={() => deleteMedia(activeGoal.id, m.id)}
-                      onBringToFront={() => bringToFront(activeGoal.id, m.id)}
+                  onDragOver={(e) => { e.preventDefault(); setIsDraggingOver(true); }}
+                  onDragLeave={() => setIsDraggingOver(false)}
+                  onDrop={handleDrop}
+                >
+                  <textarea
+                    autoFocus
+                    placeholder="Add goal details..."
+                    value={activeGoal.details || ''}
+                    onChange={e => updateGoalDetails(activeGoal.id, e.target.value)}
+                    style={{
+                      width: '100%', flex: 1, backgroundColor: 'transparent', border: 'none', resize: 'none',
+                      outline: 'none', color: 'var(--text-color)', fontSize: '1.1rem',
+                      fontFamily: 'var(--font-serif)', lineHeight: '1.6', zIndex: 1
+                    }}
+                  />
+                  
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 2, pointerEvents: 'none' }}>
+                    {(activeGoal.media || []).map(m => (
+                      <MediaElement 
+                        key={m.id} 
+                        media={m} 
+                        onUpdate={(newPos) => {
+                          const newMedia = (activeGoal.media || []).map(item => item.id === m.id ? { ...item, ...newPos } : item);
+                          setGoals(prev => prev.map(g => g.id === activeGoal.id ? { ...g, media: newMedia } : g));
+                          setActiveGoal(prev => ({ ...prev, media: newMedia }));
+                        }}
+                        onDelete={() => deleteMedia(activeGoal.id, m.id)}
+                        onBringToFront={() => bringToFront(activeGoal.id, m.id)}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ width: '320px', display: 'flex', flexDirection: 'column', borderLeft: '1px solid var(--border-color)', paddingLeft: '2rem' }}>
+                  <h3 style={{ fontSize: '1.25rem', fontFamily: 'var(--font-serif)', margin: '0 0 1rem 0' }}>Milestones</h3>
+                  
+                  <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
+                    {(activeGoal.subtasks || []).map(st => (
+                      <div key={st.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', padding: '0.5rem', backgroundColor: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); toggleSubtask(activeGoal.id, st.id); }}
+                          style={{ 
+                            width: '18px', height: '18px', flexShrink: 0, borderRadius: '4px', 
+                            border: '2px solid var(--text-color)', 
+                            backgroundColor: st.completed ? 'var(--text-color)' : 'transparent', 
+                            cursor: 'pointer', padding: 0, marginTop: '2px',
+                            display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--bg-color)'
+                          }}
+                        >
+                          {st.completed && <CheckCircle2 size={14} />}
+                        </button>
+                        <span style={{ fontSize: '0.9rem', color: 'var(--text-color)', flex: 1, textDecoration: st.completed ? 'line-through' : 'none', opacity: st.completed ? 0.5 : 1 }}>
+                          {st.text}
+                        </span>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); deleteSubtask(activeGoal.id, st.id); }}
+                          style={{ background: 'transparent', border: 'none', color: 'var(--dim-text)', cursor: 'pointer', padding: '2px' }}
+                          title="Delete Milestone"
+                        >×</button>
+                      </div>
+                    ))}
+                    {(!activeGoal.subtasks || activeGoal.subtasks.length === 0) && (
+                      <p style={{ opacity: 0.5, fontSize: '0.85rem', fontStyle: 'italic', margin: 0 }}>No milestones yet. Break this goal down into steps.</p>
+                    )}
+                  </div>
+
+                  <form 
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      addSubtask(activeGoal.id, newSubtaskText);
+                      setNewSubtaskText('');
+                    }}
+                    style={{ display: 'flex', gap: '0.5rem' }}
+                  >
+                    <input 
+                      type="text" 
+                      placeholder="Add milestone..." 
+                      value={newSubtaskText}
+                      onChange={(e) => setNewSubtaskText(e.target.value)}
+                      style={{ flex: 1, background: 'var(--bg-color)', border: '1px solid var(--border-color)', borderRadius: '6px', fontSize: '0.9rem', padding: '0.5rem', color: 'var(--text-color)', outline: 'none' }}
                     />
-                  ))}
+                    <button type="submit" style={{ background: 'var(--text-color)', color: 'var(--bg-color)', border: 'none', borderRadius: '6px', padding: '0.5rem 1rem', cursor: 'pointer', fontWeight: 600 }}>
+                      +
+                    </button>
+                  </form>
                 </div>
               </div>
             </motion.div>
@@ -713,9 +839,202 @@ function CollageBackground({ mediaList }) {
     </div>
   );
 }
+function ClassicCalendarCell({ d, i, todayStr, goals, tasks, calendarTasks, onSelectGoal, today }) {
+  const [isHovered, setIsHovered] = useState(false);
+  
+  if (!d) return <div key={`empty-${i}`} style={{ opacity: 0 }}></div>;
+          
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const dStr = `${yyyy}-${mm}-${dd}`;
+  const cellDate = new Date(yyyy, d.getMonth(), d.getDate());
+  
+  const goalsOnDay = goals.filter(g => {
+    if (!g.targetDate) return false;
+    
+    const [tY, tM, tD] = g.targetDate.split('-');
+    const end = new Date(parseInt(tY, 10), parseInt(tM, 10) - 1, parseInt(tD, 10));
+    end.setHours(23, 59, 59, 999);
+
+    let start;
+    if (g.startDate) {
+        const datePart = g.startDate.substring(0, 10);
+        const [sY, sM, sD] = datePart.split('-');
+        start = new Date(parseInt(sY, 10), parseInt(sM, 10) - 1, parseInt(sD, 10));
+    } else {
+        start = new Date(end.getTime());
+        if (g.targetDays) {
+            start.setDate(start.getDate() - g.targetDays);
+        }
+    }
+    start.setHours(0, 0, 0, 0);
+
+    return cellDate >= start && cellDate <= end;
+  });
+  
+  const tasksOnDay = (tasks || []).filter(t => {
+    const tDateStr = t.deadline || t.createdAt;
+    if (!tDateStr) return false;
+    let tDate;
+    if (tDateStr.includes('T')) {
+        tDate = new Date(tDateStr);
+    } else if (tDateStr.includes('-')) {
+        const parts = tDateStr.split('-');
+        if (parts.length === 3) {
+            tDate = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        } else {
+            tDate = new Date(tDateStr);
+        }
+    } else {
+        tDate = new Date(tDateStr);
+    }
+    return tDate.getFullYear() === d.getFullYear() && tDate.getMonth() === d.getMonth() && tDate.getDate() === d.getDate();
+  });
+  
+  const calendarTasksOnDay = (calendarTasks || []).filter(ct => ct.date === dStr);
+  const isToday = dStr === todayStr;
+  const isPast = d < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+  const totalEvents = goalsOnDay.length + tasksOnDay.length + calendarTasksOnDay.length;
+
+  return (
+    <div 
+      onMouseEnter={() => setIsHovered(true)} 
+      onMouseLeave={() => setIsHovered(false)}
+      style={{ position: 'relative', height: '140px', width: '100%', zIndex: isHovered ? 50 : 1 }}
+    >
+      <motion.div 
+        animate={{ 
+          scale: isHovered ? 1.05 : 1,
+          boxShadow: isHovered ? '0 10px 30px rgba(0,0,0,0.1)' : 'none',
+        }}
+        transition={{ duration: 0.2 }}
+        style={{ 
+          backgroundColor: isToday ? 'var(--text-color)' : 'var(--bg-color)', 
+          minHeight: '140px', 
+          height: isHovered ? 'auto' : '140px',
+          padding: '1rem', 
+          borderRadius: '16px',
+          border: isToday ? '1px solid var(--text-color)' : '1px solid rgba(0,0,0,0.05)',
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: '0.5rem',
+          opacity: isPast && !isToday ? 0.6 : 1,
+          position: isHovered ? 'absolute' : 'relative',
+          top: 0,
+          left: 0,
+          width: '100%',
+          overflow: isHovered ? 'visible' : 'hidden'
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <span style={{ fontSize: '1.25rem', fontFamily: 'var(--font-serif)', fontWeight: isToday ? 'bold' : 'normal', color: isToday ? 'var(--bg-color)' : 'var(--text-color)', backgroundColor: 'transparent', padding: '4px' }}>
+            {d.getDate()}
+          </span>
+        </div>
+
+        {/* If NOT hovered, show colored dots */}
+        {!isHovered && totalEvents > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: 'auto' }}>
+            {goalsOnDay.map((g, idx) => <div key={`gdot-${idx}`} style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--accent-orange)' }}></div>)}
+            {tasksOnDay.map((t, idx) => <div key={`tdot-${idx}`} style={{ width: '8px', height: '8px', borderRadius: '50%', border: `1px solid ${isToday ? 'var(--bg-color)' : 'var(--text-color)'}`, backgroundColor: t.completed ? (isToday ? 'var(--bg-color)' : 'var(--text-color)') : 'transparent' }}></div>)}
+            {calendarTasksOnDay.map((ct, idx) => <div key={`ctdot-${idx}`} style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: ct.completed ? 'var(--accent-green)' : (ct.color || 'var(--accent-orange)') }}></div>)}
+          </div>
+        )}
+
+        {/* If HOVERED, show full list of pills */}
+        {isHovered && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1, marginTop: '0.5rem' }}>
+            {goalsOnDay.map(g => (
+              <div 
+                key={`goal-${g.id}`} 
+                onClick={() => onSelectGoal(g)}
+                className="interactive"
+                style={{ 
+                  fontSize: '0.75rem', 
+                  background: g.isCompleted ? (isToday ? 'var(--bg-color)' : 'var(--text-color)') : 'var(--accent-orange)', 
+                  color: g.isCompleted ? (isToday ? 'var(--text-color)' : 'var(--bg-color)') : 'var(--bg-color)', 
+                  padding: '6px 10px', 
+                  borderRadius: '6px', 
+                  whiteSpace: 'nowrap', 
+                  overflow: 'hidden', 
+                  textOverflow: 'ellipsis',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+                title={`Goal: ${g.title}`}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14"></path><path d="M12 5l7 7-7 7"></path></svg>
+                {g.title}
+              </div>
+            ))}
+            {tasksOnDay.map(t => (
+              <div 
+                key={`task-${t.id}`}
+                onClick={() => window.location.hash = '#/tasks'}
+                className="interactive"
+                style={{ 
+                  fontSize: '0.75rem', 
+                  background: t.completed ? (isToday ? 'rgba(255,255,255,0.2)' : 'var(--text-color)') : 'transparent',
+                  border: `1px solid ${isToday ? 'var(--bg-color)' : 'var(--text-color)'}`,
+                  color: t.completed ? (isToday ? 'var(--bg-color)' : 'var(--bg-color)') : (isToday ? 'var(--bg-color)' : 'var(--text-color)'), 
+                  padding: '6px 10px', 
+                  borderRadius: '6px', 
+                  whiteSpace: 'nowrap', 
+                  overflow: 'hidden', 
+                  textOverflow: 'ellipsis',
+                  cursor: 'pointer',
+                  opacity: t.completed ? 0.7 : 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+                title={`Task: ${t.text}`}
+              >
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', border: `1px solid ${isToday ? 'var(--bg-color)' : 'var(--text-color)'}`, backgroundColor: t.completed ? (isToday ? 'var(--bg-color)' : 'var(--bg-color)') : 'transparent', flexShrink: 0 }}></div>
+                {t.text}
+              </div>
+            ))}
+            {calendarTasksOnDay.map(ct => (
+              <div 
+                key={`caltask-${ct.id}`}
+                className="interactive"
+                style={{ 
+                  fontSize: '0.75rem', 
+                  background: ct.completed ? (isToday ? 'rgba(255,255,255,0.2)' : 'var(--text-color)') : 'transparent',
+                  border: `1px solid ${ct.color || (isToday ? 'var(--bg-color)' : 'var(--text-color)')}`,
+                  color: ct.completed ? (isToday ? 'var(--bg-color)' : 'var(--bg-color)') : (isToday ? 'var(--bg-color)' : 'var(--text-color)'), 
+                  padding: '6px 10px', 
+                  borderRadius: '6px', 
+                  whiteSpace: 'nowrap', 
+                  overflow: 'hidden', 
+                  textOverflow: 'ellipsis',
+                  cursor: 'pointer',
+                  opacity: ct.completed ? 0.7 : 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+                title={`Calendar Task: ${ct.task}`}
+              >
+                <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: ct.completed ? 'var(--accent-green)' : (ct.color || (isToday ? 'var(--bg-color)' : 'var(--text-color)')), flexShrink: 0 }}></div>
+                {ct.time} {ct.task}
+              </div>
+            ))}
+          </motion.div>
+        )}
+      </motion.div>
+    </div>
+  );
+}
 
 function ClassicCalendarView({ goals, onSelectGoal }) {
-  const { tasks } = useContext(AppContext) || { tasks: [] };
+  const { tasks, calendarTasks } = useContext(AppContext) || { tasks: [], calendarTasks: [] };
   const [currentMonth, setCurrentMonth] = useState(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
 
   const nextMonth = () => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
@@ -765,156 +1084,16 @@ function ClassicCalendarView({ goals, onSelectGoal }) {
             {d}
           </div>
         ))}
-        {days.map((d, i) => {
-          if (!d) return <div key={`empty-${i}`} style={{ opacity: 0 }}></div>;
-          
-          const yyyy = d.getFullYear();
-          const mm = String(d.getMonth() + 1).padStart(2, '0');
-          const dd = String(d.getDate()).padStart(2, '0');
-          const dStr = `${yyyy}-${mm}-${dd}`;
-          const cellDate = new Date(yyyy, d.getMonth(), d.getDate());
-          
-          const goalsOnDay = goals.filter(g => {
-            if (!g.targetDate) return false;
-            
-            const [tY, tM, tD] = g.targetDate.split('-');
-            const end = new Date(parseInt(tY, 10), parseInt(tM, 10) - 1, parseInt(tD, 10));
-            end.setHours(23, 59, 59, 999);
-
-            let start;
-            if (g.startDate) {
-                const datePart = g.startDate.substring(0, 10);
-                const [sY, sM, sD] = datePart.split('-');
-                start = new Date(parseInt(sY, 10), parseInt(sM, 10) - 1, parseInt(sD, 10));
-            } else {
-                start = new Date(end.getTime());
-                if (g.targetDays) {
-                    start.setDate(start.getDate() - g.targetDays);
-                }
-            }
-            start.setHours(0, 0, 0, 0);
-
-            return cellDate >= start && cellDate <= end;
-          });
-          const tasksOnDay = (tasks || []).filter(t => {
-            const tDateStr = t.deadline || t.createdAt;
-            if (!tDateStr) return false;
-            let tDate;
-            if (tDateStr.includes('T')) {
-                tDate = new Date(tDateStr);
-            } else if (tDateStr.includes('-')) {
-                const parts = tDateStr.split('-');
-                if (parts.length === 3) {
-                    tDate = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
-                } else {
-                    tDate = new Date(tDateStr);
-                }
-            } else {
-                tDate = new Date(tDateStr);
-            }
-            return tDate.getFullYear() === d.getFullYear() && tDate.getMonth() === d.getMonth() && tDate.getDate() === d.getDate();
-          });
-          const isToday = dStr === todayStr;
-          const isPast = d < new Date(today.getFullYear(), today.getMonth(), today.getDate());
-
-          return (
-            <motion.div key={i} 
-              whileHover={{ scale: 1.02, zIndex: 10, backgroundColor: 'rgba(0,0,0,0.03)', boxShadow: '0 10px 20px rgba(0,0,0,0.05)' }}
-              style={{ 
-                backgroundColor: isToday ? 'var(--text-color)' : 'var(--bg-color)', 
-                minHeight: '140px', 
-                padding: '1rem', 
-                borderRadius: '16px',
-                border: isToday ? '1px solid var(--text-color)' : '1px solid rgba(0,0,0,0.05)',
-                display: 'flex', 
-                flexDirection: 'column', 
-                gap: '0.5rem',
-                opacity: isPast && !isToday ? 0.6 : 1,
-                position: 'relative'
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <span style={{ 
-                  fontSize: '1.25rem', 
-                  fontFamily: 'var(--font-serif)',
-                  fontWeight: isToday ? 'bold' : 'normal',
-                  color: isToday ? 'var(--bg-color)' : 'var(--text-color)',
-                  backgroundColor: 'transparent',
-                  padding: '4px',
-                }}>
-                  {d.getDate()}
-                </span>
-                {(goalsOnDay.length > 0 || tasksOnDay.length > 0) && (
-                   <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: isToday ? 'var(--bg-color)' : 'var(--text-color)', marginTop: '8px', marginRight: '4px' }}></span>
-                )}
-              </div>
-              
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1, overflowY: 'auto', marginTop: '0.5rem' }}>
-                {goalsOnDay.map(g => (
-                  <div 
-                    key={`goal-${g.id}`} 
-                    onClick={() => onSelectGoal(g)}
-                    className="interactive"
-                    style={{ 
-                      fontSize: '0.75rem', 
-                      background: g.isCompleted ? (isToday ? 'var(--bg-color)' : 'var(--text-color)') : 'var(--accent-orange)', 
-                      color: g.isCompleted ? (isToday ? 'var(--text-color)' : 'var(--bg-color)') : 'var(--bg-color)', 
-                      padding: '6px 10px', 
-                      borderRadius: '6px', 
-                      whiteSpace: 'nowrap', 
-                      overflow: 'hidden', 
-                      textOverflow: 'ellipsis',
-                      cursor: 'pointer',
-                      fontWeight: 'bold',
-                      boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}
-                    title={`Goal: ${g.title}`}
-                  >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14"></path><path d="M12 5l7 7-7 7"></path></svg>
-                    {g.title}
-                  </div>
-                ))}
-                {tasksOnDay.map(t => (
-                  <div 
-                    key={`task-${t.id}`}
-                    onClick={() => window.location.hash = '#/tasks'}
-                    className="interactive"
-                    style={{ 
-                      fontSize: '0.75rem', 
-                      background: t.completed ? (isToday ? 'rgba(255,255,255,0.2)' : 'var(--text-color)') : 'transparent',
-                      border: `1px solid ${isToday ? 'var(--bg-color)' : 'var(--text-color)'}`,
-                      color: t.completed ? (isToday ? 'var(--bg-color)' : 'var(--bg-color)') : (isToday ? 'var(--bg-color)' : 'var(--text-color)'), 
-                      padding: '6px 10px', 
-                      borderRadius: '6px', 
-                      whiteSpace: 'nowrap', 
-                      overflow: 'hidden', 
-                      textOverflow: 'ellipsis',
-                      cursor: 'pointer',
-                      opacity: t.completed ? 0.7 : 1,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px'
-                    }}
-                    title={`Task: ${t.text}`}
-                  >
-                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', border: `1px solid ${isToday ? 'var(--bg-color)' : 'var(--text-color)'}`, backgroundColor: t.completed ? (isToday ? 'var(--bg-color)' : 'var(--bg-color)') : 'transparent', flexShrink: 0 }}></div>
-                    {t.text}
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          );
-        })}
+        {days.map((d, i) => (
+          <ClassicCalendarCell key={i} d={d} i={i} todayStr={todayStr} goals={goals} tasks={tasks} calendarTasks={calendarTasks} onSelectGoal={onSelectGoal} today={today} />
+        ))}
       </div>
     </div>
   );
 }
 
 function ProCalendarView({ goals, onSelectGoal, theme }) {
-  const { tasks } = useContext(AppContext) || { tasks: [] };
+  const { tasks, calendarTasks } = useContext(AppContext) || { tasks: [], calendarTasks: [] };
   const [currentMonth, setCurrentMonth] = useState(new Date(new Date().getFullYear(), new Date().getMonth(), 1));
   const [selectedDate, setSelectedDate] = useState(new Date());
 
@@ -1007,7 +1186,11 @@ function ProCalendarView({ goals, onSelectGoal, theme }) {
       return tDate.getFullYear() === yyyy && tDate.getMonth() === (d.getMonth()) && tDate.getDate() === d.getDate();
     }).map(t => ({ ...t, type: 'task' }));
     
-    return [...goalsOnDay, ...tasksOnDay];
+    const calendarTasksOnDay = (calendarTasks || []).filter(ct => {
+      return ct.date === dStr;
+    }).map(ct => ({ ...ct, type: 'calendarTask', text: ct.task }));
+    
+    return [...goalsOnDay, ...tasksOnDay, ...calendarTasksOnDay];
   };
 
   const selectedDateEvents = getEventsForDate(selectedDate);
@@ -1123,7 +1306,7 @@ function ProCalendarView({ goals, onSelectGoal, theme }) {
                   
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', flex: 1, overflowY: 'auto' }}>
                     {dayEvents.slice(0, 4).map((ev, i) => {
-                       const dotColor = ev.type === 'goal' ? '#FFB432' : (ev.completed ? localText : (theme === 'dark' ? '#D4F536' : '#000'));
+                       const dotColor = ev.type === 'goal' ? '#FFB432' : (ev.type === 'calendarTask' && ev.color ? ev.color : (ev.completed ? localText : (theme === 'dark' ? '#D4F536' : '#000')));
                        const title = ev.type === 'goal' ? ev.title : ev.text;
                        return (
                          <div key={i} style={{ display: 'flex', flexDirection: 'column', opacity: ev.completed ? 0.5 : 1 }}>
@@ -1132,7 +1315,7 @@ function ProCalendarView({ goals, onSelectGoal, theme }) {
                              <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</span>
                            </div>
                            <div style={{ fontSize: '0.65rem', opacity: 0.5, marginLeft: '0.8rem', color: localText }}>
-                             {ev.type === 'goal' ? 'All Day' : (ev.deadline ? new Date(ev.deadline).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Pending')}
+                             {ev.type === 'goal' ? 'All Day' : (ev.type === 'calendarTask' ? ev.time : (ev.deadline ? new Date(ev.deadline).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Pending'))}
                            </div>
                          </div>
                        );
@@ -1203,9 +1386,9 @@ function ProCalendarView({ goals, onSelectGoal, theme }) {
                 <div style={{ opacity: 0.5, fontSize: '0.9rem', fontStyle: 'italic', color: localText }}>No events scheduled.</div>
               ) : (
                 selectedDateEvents.map((ev, i) => {
-                  const dotColor = ev.type === 'goal' ? '#FFB432' : (ev.completed ? localText : (theme === 'dark' ? '#D4F536' : '#000'));
+                  const dotColor = ev.type === 'goal' ? '#FFB432' : (ev.type === 'calendarTask' && ev.color ? ev.color : (ev.completed ? localText : (theme === 'dark' ? '#D4F536' : '#000')));
                   const title = ev.type === 'goal' ? ev.title : ev.text;
-                  const timeStr = ev.type === 'goal' ? 'All Day' : (ev.deadline ? new Date(ev.deadline).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Pending');
+                  const timeStr = ev.type === 'goal' ? 'All Day' : (ev.type === 'calendarTask' ? ev.time : (ev.deadline ? new Date(ev.deadline).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Pending'));
 
                   return (
                     <div key={i} className="interactive" onClick={() => ev.type === 'goal' && onSelectGoal(ev)} style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', borderBottom: i < selectedDateEvents.length - 1 ? `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}` : 'none', paddingBottom: i < selectedDateEvents.length - 1 ? '1.5rem' : 0, cursor: 'pointer', opacity: ev.completed ? 0.5 : 1 }}>
@@ -1217,6 +1400,9 @@ function ProCalendarView({ goals, onSelectGoal, theme }) {
                         </div>
                         {ev.type === 'goal' && (
                            <div style={{ fontSize: '0.65rem', opacity: 0.5, color: localText, textTransform: 'uppercase', letterSpacing: '1px', border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`, padding: '2px 6px', borderRadius: '4px' }}>Goal</div>
+                        )}
+                        {ev.type === 'calendarTask' && (
+                           <div style={{ fontSize: '0.65rem', opacity: 0.5, color: localText, textTransform: 'uppercase', letterSpacing: '1px', border: `1px solid ${theme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`, padding: '2px 6px', borderRadius: '4px' }}>Calendar</div>
                         )}
                       </div>
                     </div>
