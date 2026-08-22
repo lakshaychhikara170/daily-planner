@@ -86,8 +86,8 @@ function Goals() {
   };
 
   const updateGoalDetails = (id, details) => {
-    setGoals(prev => prev.map(g => g.id === id ? { ...g, details } : g));
-    if (activeGoal && activeGoal.id === id) setActiveGoal(prev => ({ ...prev, details }));
+    setGoals(prev => prev.map(g => String(g.id) === String(id) ? { ...g, details } : g));
+    if (activeGoal && String(activeGoal.id) === String(id)) setActiveGoal(prev => ({ ...prev, details }));
   };
 
   const processFile = async (file) => {
@@ -105,7 +105,7 @@ function Goals() {
     };
 
     setGoals(prev => prev.map(g => {
-      if (g.id === activeGoal.id) {
+      if (String(g.id) === String(activeGoal.id)) {
         return { ...g, media: [...(g.media || []), newMediaObj] };
       }
       return g;
@@ -136,20 +136,20 @@ function Goals() {
 
   const deleteMedia = async (goalId, mediaId) => {
     await deleteMediaBlob(mediaId, user?.uid);
-    const currentMedia = goals.find(g => g.id === goalId)?.media || [];
-    setGoals(prev => prev.map(g => g.id === goalId ? { ...g, media: currentMedia.filter(m => m.id !== mediaId) } : g));
-    if (activeGoal && activeGoal.id === goalId) setActiveGoal(prev => ({ ...prev, media: currentMedia.filter(m => m.id !== mediaId) }));
+    const currentMedia = goals.find(g => String(g.id) === String(goalId))?.media || [];
+    setGoals(prev => prev.map(g => String(g.id) === String(goalId) ? { ...g, media: currentMedia.filter(m => String(m.id) !== String(mediaId)) } : g));
+    if (activeGoal && String(activeGoal.id) === String(goalId)) setActiveGoal(prev => ({ ...prev, media: currentMedia.filter(m => String(m.id) !== String(mediaId)) }));
   };
 
   const bringToFront = (goalId, mediaId) => {
-    const goal = goals.find(g => g.id === goalId);
+    const goal = goals.find(g => String(g.id) === String(goalId));
     if (!goal || !goal.media) return;
     
     const highestZ = Math.max(0, ...goal.media.map(m => m.zIndex || 1));
-    const newMedia = goal.media.map(m => m.id === mediaId ? { ...m, zIndex: highestZ + 1 } : m);
+    const newMedia = goal.media.map(m => String(m.id) === String(mediaId) ? { ...m, zIndex: highestZ + 1 } : m);
     
-    setGoals(prev => prev.map(g => g.id === goalId ? { ...g, media: newMedia } : g));
-    if (activeGoal && activeGoal.id === goalId) setActiveGoal(prev => ({ ...prev, media: newMedia }));
+    setGoals(prev => prev.map(g => String(g.id) === String(goalId) ? { ...g, media: newMedia } : g));
+    if (activeGoal && String(activeGoal.id) === String(goalId)) setActiveGoal(prev => ({ ...prev, media: newMedia }));
   };
 
   const toggleGoal = (id) => {
@@ -164,38 +164,38 @@ function Goals() {
     if (!text.trim()) return;
     const newSubtask = { id: Date.now(), text: text.trim(), completed: false };
     setGoals(prev => prev.map(g => {
-      if (g.id === goalId) {
+      if (String(g.id) === String(goalId)) {
         return { ...g, subtasks: [...(g.subtasks || []), newSubtask] };
       }
       return g;
     }));
-    if (activeGoal && activeGoal.id === goalId) {
+    if (activeGoal && String(activeGoal.id) === String(goalId)) {
       setActiveGoal(prev => ({ ...prev, subtasks: [...(prev.subtasks || []), newSubtask] }));
     }
   };
 
   const toggleSubtask = (goalId, subtaskId) => {
     setGoals(prev => prev.map(g => {
-      if (g.id === goalId) {
-        const newSubtasks = (g.subtasks || []).map(st => st.id === subtaskId ? { ...st, completed: !st.completed } : st);
+      if (String(g.id) === String(goalId)) {
+        const newSubtasks = (g.subtasks || []).map(st => String(st.id) === String(subtaskId) ? { ...st, completed: !st.completed } : st);
         return { ...g, subtasks: newSubtasks };
       }
       return g;
     }));
-    if (activeGoal && activeGoal.id === goalId) {
-      setActiveGoal(prev => ({ ...prev, subtasks: (prev.subtasks || []).map(st => st.id === subtaskId ? { ...st, completed: !st.completed } : st) }));
+    if (activeGoal && String(activeGoal.id) === String(goalId)) {
+      setActiveGoal(prev => ({ ...prev, subtasks: (prev.subtasks || []).map(st => String(st.id) === String(subtaskId) ? { ...st, completed: !st.completed } : st) }));
     }
   };
 
   const deleteSubtask = (goalId, subtaskId) => {
     setGoals(prev => prev.map(g => {
-      if (g.id === goalId) {
-        return { ...g, subtasks: (g.subtasks || []).filter(st => st.id !== subtaskId) };
+      if (String(g.id) === String(goalId)) {
+        return { ...g, subtasks: (g.subtasks || []).filter(st => String(st.id) !== String(subtaskId)) };
       }
       return g;
     }));
-    if (activeGoal && activeGoal.id === goalId) {
-      setActiveGoal(prev => ({ ...prev, subtasks: (prev.subtasks || []).filter(st => st.id !== subtaskId) }));
+    if (activeGoal && String(activeGoal.id) === String(goalId)) {
+      setActiveGoal(prev => ({ ...prev, subtasks: (prev.subtasks || []).filter(st => String(st.id) !== String(subtaskId)) }));
     }
   };
 
