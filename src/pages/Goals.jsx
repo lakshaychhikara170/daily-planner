@@ -90,8 +90,8 @@ function Goals() {
     if (activeGoal && String(activeGoal.id) === String(id)) setActiveGoal(prev => ({ ...prev, details }));
   };
 
-  const processFile = async (file) => {
-    if (!file || !activeGoal) return;
+  const processFile = async (file, targetGoalId) => {
+    if (!file || !targetGoalId) return;
     
     const mediaId = await saveMediaBlob(file, user?.uid);
     const newMediaObj = {
@@ -105,31 +105,31 @@ function Goals() {
     };
 
     setGoals(prev => prev.map(g => {
-      if (String(g.id) === String(activeGoal.id)) {
+      if (String(g.id) === String(targetGoalId)) {
         return { ...g, media: [...(g.media || []), newMediaObj] };
       }
       return g;
     }));
     
     setActiveGoal(prev => {
-      if (!prev) return prev;
+      if (!prev || String(prev.id) !== String(targetGoalId)) return prev;
       return { ...prev, media: [...(prev.media || []), newMediaObj] };
     });
   };
 
-  const handleFileUpload = (e) => {
+  const handleFileUpload = (e, targetGoalId) => {
     if (e.target.files && e.target.files[0]) {
-      processFile(e.target.files[0]);
+      processFile(e.target.files[0], targetGoalId);
     }
     e.target.value = '';
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = (e, targetGoalId) => {
     e.preventDefault();
     setIsDraggingOver(false);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
       Array.from(e.dataTransfer.files).forEach(file => {
-        processFile(file);
+        processFile(file, targetGoalId);
       });
     }
   };
@@ -604,7 +604,7 @@ function Goals() {
                   }}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                     Add Media
-                    <input type="file" style={{ display: 'none' }} accept="image/*,video/*,application/pdf" onChange={handleFileUpload} />
+                    <input type="file" style={{ display: 'none' }} accept="image/*,video/*,application/pdf" onChange={(e) => handleFileUpload(e, activeGoal.id)} />
                   </label>
                 </div>
               </div>
@@ -621,7 +621,7 @@ function Goals() {
                   }}
                   onDragOver={(e) => { e.preventDefault(); setIsDraggingOver(true); }}
                   onDragLeave={() => setIsDraggingOver(false)}
-                  onDrop={handleDrop}
+                  onDrop={(e) => handleDrop(e, activeGoal.id)}
                 >
                   <textarea
                     autoFocus
